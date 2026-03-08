@@ -1,27 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 228 100% 58%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 228 100% 96%;
+    --secondary-foreground: 228 100% 30%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 228 100% 96%;
+    --accent-foreground: 228 100% 30%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 228 100% 58%;
+    --radius: 0.75rem;
+
+    /* Telegram viewport */
+    --tg-viewport-height: 100vh;
+    --tg-viewport-stable-height: 100vh;
+    --safe-area-inset-top: env(safe-area-inset-top, 0px);
+    --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    overflow-x: hidden;
+  }
+}
+
+/* Subtle glitch accent — use sparingly on branding elements */
+.glitch-accent {
+  position: relative;
+}
+
+.glitch-accent::before,
+.glitch-accent::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.glitch-accent:hover::before {
+  animation: glitch-shift-1 0.2s ease-in-out;
+  color: #5B7FFF;
+  opacity: 0.7;
+}
+
+.glitch-accent:hover::after {
+  animation: glitch-shift-2 0.2s ease-in-out 0.05s;
+  color: #1A3FCC;
+  opacity: 0.7;
+}
+
+@keyframes glitch-shift-1 {
+  0%, 100% { transform: translate(0); }
+  25% { transform: translate(2px, -1px); }
+  75% { transform: translate(-1px, 1px); }
+}
+
+@keyframes glitch-shift-2 {
+  0%, 100% { transform: translate(0); }
+  25% { transform: translate(-2px, 1px); }
+  75% { transform: translate(1px, -1px); }
+}
+
+/* Hide scrollbar but keep functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
