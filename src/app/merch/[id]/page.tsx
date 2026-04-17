@@ -49,15 +49,17 @@ export default function MerchDetailPage() {
             {/* Image Gallery */}
             <div className="px-4">
                 <div className="relative aspect-square rounded-2xl overflow-hidden bg-muted mb-3">
-                    <Image
-                        src={item.image_urls[activeImage]}
-                        alt={item.name}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 600px"
-                        className="object-cover transition-opacity duration-300"
-                        priority
-                    />
-                    {!item.available && (
+                    {item.gallery[activeImage] && (
+                        <Image
+                            src={item.gallery[activeImage].url}
+                            alt={item.gallery[activeImage].alt}
+                            fill
+                            sizes="(max-width: 768px) 100vw, 600px"
+                            className="object-cover transition-opacity duration-300"
+                            priority
+                        />
+                    )}
+                    {!item.isAvailable && (
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                             <span className="text-white text-lg font-bold tracking-widest uppercase">
                                 Sold Out
@@ -67,9 +69,9 @@ export default function MerchDetailPage() {
                 </div>
 
                 {/* Image thumbnails */}
-                {item.image_urls.length > 1 && (
+                {item.gallery.length > 1 && (
                     <div className="flex gap-2 overflow-x-auto no-scrollbar">
-                        {item.image_urls.map((url, i) => (
+                        {item.gallery.map((image, i) => (
                             <button
                                 key={i}
                                 onClick={() => setActiveImage(i)}
@@ -79,8 +81,8 @@ export default function MerchDetailPage() {
                                     }`}
                             >
                                 <Image
-                                    src={url}
-                                    alt={`${item.name} ${i + 1}`}
+                                    src={image.url}
+                                    alt={image.alt}
                                     fill
                                     sizes="64px"
                                     className="object-cover"
@@ -96,16 +98,16 @@ export default function MerchDetailPage() {
             <div className="px-4 py-5 space-y-4">
                 <div>
                     <p className="text-sm font-medium text-muted-foreground">
-                        {item.artist.name}
+                        {item.artist?.name ?? 'TRV'}
                     </p>
                     <h1 className="text-2xl font-black tracking-tight text-foreground mt-1">
                         {item.name}
                     </h1>
                     <div className="flex items-center gap-2 mt-2">
                         <Badge className="bg-trv-blue text-white text-xs font-bold px-3 py-1">
-                            {item.type}
+                            {item.categoryLabel}
                         </Badge>
-                        {!item.available && (
+                        {!item.isAvailable && (
                             <Badge variant="secondary" className="text-xs font-semibold text-destructive">
                                 Sold Out
                             </Badge>
@@ -126,7 +128,7 @@ export default function MerchDetailPage() {
 
                 <p className="text-xs text-muted-foreground">
                     Released{' '}
-                    {new Date(item.release_date).toLocaleDateString('ru-RU', {
+                    {new Date(item.releaseDate).toLocaleDateString('ru-RU', {
                         day: 'numeric',
                         month: 'long',
                         year: 'numeric',
@@ -135,10 +137,10 @@ export default function MerchDetailPage() {
 
                 <Button
                     className="w-full bg-trv-blue hover:bg-trv-blue-dark text-white font-bold rounded-xl h-12 text-base disabled:opacity-50"
-                    disabled={!item.available}
-                    onClick={() => openExternalLink(item.buy_url)}
+                    disabled={!item.isAvailable || !item.purchaseLink}
+                    onClick={() => item.purchaseLink && openExternalLink(item.purchaseLink.url)}
                 >
-                    {item.available ? 'Buy' : 'Sold Out'}
+                    {item.isAvailable ? item.purchaseLink?.label ?? 'Buy' : 'Sold Out'}
                 </Button>
             </div>
         </div>

@@ -5,9 +5,7 @@ import { useUIStore } from '@/store/uiStore';
 import { MerchCard } from '@/components/cards/MerchCard';
 import { MerchCardSkeleton } from '@/components/skeletons/MerchCardSkeleton';
 import { FilterTabs } from '@/components/FilterTabs';
-import { MerchSort } from '@/types';
-
-const sortOptions: MerchSort[] = ['newest', 'artist', 'available'];
+import { MERCH_SORT_OPTIONS } from '@/domain/config';
 
 export default function MerchPage() {
     const { merchSort, setMerchSort } = useUIStore();
@@ -18,7 +16,7 @@ export default function MerchPage() {
             {/* Sort Tabs */}
             <div className="pt-4">
                 <FilterTabs
-                    options={sortOptions}
+                    options={MERCH_SORT_OPTIONS}
                     activeOption={merchSort}
                     onSelect={setMerchSort}
                 />

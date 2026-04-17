@@ -7,7 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { appendPromoCodeToUrl } from '@/domain/external-links';
 import { openExternalLink } from '@/lib/telegram';
+import { getPreferredEventLink } from '@/lib/services/viewModelMappers';
 import { useState } from 'react';
 
 export default function EventDetailPage() {
@@ -35,9 +37,11 @@ export default function EventDetailPage() {
         );
     }
 
-    const ticketUrl = promoCode
-        ? `${event.ticket_url}?promo=${encodeURIComponent(promoCode)}`
-        : event.ticket_url;
+    const primaryLink = getPreferredEventLink(event);
+    const primaryLinkUrl =
+        primaryLink?.kind === 'tickets'
+            ? appendPromoCodeToUrl(primaryLink.url, promoCode)
+            : primaryLink?.url ?? null;
 
     return (
         <div className="animate-fade-in">
@@ -54,14 +58,16 @@ export default function EventDetailPage() {
             {/* Poster */}
             <div className="px-4">
                 <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-muted">
-                    <Image
-                        src={event.poster_url}
-                        alt={event.name}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 600px"
-                        className="object-cover"
-                        priority
-                    />
+                    {event.poster && (
+                        <Image
+                            src={event.poster.url}
+                            alt={event.poster.alt}
+                            fill
+                            sizes="(max-width: 768px) 100vw, 600px"
+                            className="object-cover"
+                            priority
+                        />
+                    )}
                 </div>
             </div>
 
@@ -70,12 +76,12 @@ export default function EventDetailPage() {
                 <div>
                     <div className="flex items-center gap-2 mb-2">
                         <Badge className="bg-trv-blue text-white text-xs font-bold px-3 py-1">
-                            {event.type}
+                            {event.eventTypeLabel}
                         </Badge>
                         <Badge variant="secondary" className="text-xs font-semibold">
-                            {event.age_restriction}
+                            {event.ageRestriction}
                         </Badge>
-                        {event.is_upcoming && (
+                        {event.isUpcoming && (
                             <Badge className="bg-green-500 text-white text-xs font-bold px-3 py-1">
                                 Upcoming
                             </Badge>
@@ -85,7 +91,7 @@ export default function EventDetailPage() {
                         {event.name}
                     </h1>
                     <p className="text-sm font-medium text-muted-foreground mt-1">
-                        {new Date(event.date).toLocaleDateString('ru-RU', {
+                        {new Date(event.startsAt).toLocaleDateString('ru-RU', {
                             weekday: 'long',
                             day: 'numeric',
                             month: 'long',
@@ -99,20 +105,20 @@ export default function EventDetailPage() {
                 </p>
 
                 {/* Photo Gallery */}
-                {event.photos.length > 0 && (
+                {event.gallery.length > 0 && (
                     <div className="space-y-3">
                         <h2 className="text-xs font-bold uppercase tracking-widest text-trv-blue">
                             Photos
                         </h2>
                         <div className="grid grid-cols-2 gap-2">
-                            {event.photos.map((photo, i) => (
+                            {event.gallery.map((photo, i) => (
                                 <div
                                     key={i}
                                     className="relative aspect-[4/3] rounded-xl overflow-hidden bg-muted"
                                 >
                                     <Image
-                                        src={photo}
-                                        alt={`${event.name} photo ${i + 1}`}
+                                        src={photo.url}
+                                        alt={photo.alt}
                                         fill
                                         sizes="(max-width: 768px) 50vw, 300px"
                                         className="object-cover"
@@ -125,24 +131,26 @@ export default function EventDetailPage() {
                 )}
 
                 {/* Promo Code + Ticket Button */}
-                {event.is_upcoming && (
+                {event.isUpcoming && primaryLink && (
                     <div className="space-y-3 pt-2">
-                        <div className="space-y-1.5">
-                            <label className="text-xs font-semibold text-foreground uppercase tracking-wider">
-                                Promo Code
-                            </label>
-                            <Input
-                                placeholder="Enter promo code"
-                                value={promoCode}
-                                onChange={(e) => setPromoCode(e.target.value)}
-                                className="rounded-xl h-11"
-                            />
-                        </div>
+                        {primaryLink.kind === 'tickets' && (
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-semibold text-foreground uppercase tracking-wider">
+                                    Promo Code
+                                </label>
+                                <Input
+                                    placeholder="Enter promo code"
+                                    value={promoCode}
+                                    onChange={(e) => setPromoCode(e.target.value)}
+                                    className="rounded-xl h-11"
+                                />
+                            </div>
+                        )}
                         <Button
                             className="w-full bg-trv-blue hover:bg-trv-blue-dark text-white font-bold rounded-xl h-12 text-base"
-                            onClick={() => openExternalLink(ticketUrl)}
+                            onClick={() => primaryLinkUrl && openExternalLink(primaryLinkUrl)}
                         >
-                            Buy Tickets
+                            {primaryLink.label}
                         </Button>
                     </div>
                 )}

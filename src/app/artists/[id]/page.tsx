@@ -7,14 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ReleaseCard } from '@/components/cards/ReleaseCard';
 import { MerchCard } from '@/components/cards/MerchCard';
-import { Artist } from '@/types';
-
-const roleLabels: Record<string, string> = {
-    artist: 'Artist',
-    producer: 'Producer',
-    designer: 'Designer',
-    dj: 'DJ',
-};
 
 export default function ArtistDetailPage() {
     const params = useParams();
@@ -42,9 +34,6 @@ export default function ArtistDetailPage() {
         );
     }
 
-    // For producers: show produced releases instead of regular releases
-    const isProducer = artist.role === 'producer';
-
     return (
         <div className="animate-fade-in">
             {/* Back button */}
@@ -60,21 +49,30 @@ export default function ArtistDetailPage() {
             {/* Profile Header */}
             <div className="flex flex-col items-center px-4 pb-6">
                 <div className="relative w-36 h-36 rounded-full overflow-hidden bg-muted ring-4 ring-trv-blue-50 mb-4">
-                    <Image
-                        src={artist.photo_url}
-                        alt={artist.name}
-                        fill
-                        sizes="144px"
-                        className="object-cover"
-                        priority
-                    />
+                    {artist.photo && (
+                        <Image
+                            src={artist.photo.url}
+                            alt={artist.photo.alt}
+                            fill
+                            sizes="144px"
+                            className="object-cover"
+                            priority
+                        />
+                    )}
                 </div>
                 <h1 className="text-2xl font-black tracking-tight text-foreground">
                     {artist.name}
                 </h1>
-                <Badge className="mt-2 bg-trv-blue text-white font-bold text-xs px-4 py-1">
-                    {roleLabels[artist.role]}
-                </Badge>
+                <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+                    {artist.roleLabels.map((roleLabel) => (
+                        <Badge
+                            key={roleLabel}
+                            className="bg-trv-blue text-white font-bold text-xs px-4 py-1"
+                        >
+                            {roleLabel}
+                        </Badge>
+                    ))}
+                </div>
             </div>
 
             {/* Bio */}
@@ -84,42 +82,37 @@ export default function ArtistDetailPage() {
                 </p>
             </div>
 
-            {/* Pinned / Recent Releases */}
-            {artist.releases.length > 0 && (
+            {artist.artistReleases.length > 0 && (
                 <section className="px-4 pb-6 space-y-4">
                     <h2 className="text-xs font-bold uppercase tracking-widest text-trv-blue">
-                        {isProducer ? 'Featured On' : 'Releases'}
+                        Releases
                     </h2>
-                    {artist.releases.map((release) => (
+                    {artist.artistReleases.map((release) => (
                         <ReleaseCard key={release.id} release={release} />
                     ))}
                 </section>
             )}
 
-            {/* Produced Releases (for producers) */}
-            {isProducer && artist.producedReleases.length > 0 && (
+            {artist.supportReleases.length > 0 && (
                 <section className="px-4 pb-6 space-y-4">
                     <h2 className="text-xs font-bold uppercase tracking-widest text-trv-blue">
-                        Produced
+                        Contributions
                     </h2>
-                    {artist.producedReleases.map((release) => (
+                    {artist.supportReleases.map((release) => (
                         <ReleaseCard key={release.id} release={release} />
                     ))}
                 </section>
             )}
 
             {/* Merch */}
-            {artist.merch.length > 0 && (
+            {artist.merchItems.length > 0 && (
                 <section className="px-4 pb-6 space-y-4">
                     <h2 className="text-xs font-bold uppercase tracking-widest text-trv-blue">
                         Merch
                     </h2>
                     <div className="grid grid-cols-2 gap-3">
-                        {artist.merch.map((item) => (
-                            <MerchCard
-                                key={item.id}
-                                item={{ ...item, artist: artist as Artist }}
-                            />
+                        {artist.merchItems.map((item) => (
+                            <MerchCard key={item.id} item={item} />
                         ))}
                     </div>
                 </section>
