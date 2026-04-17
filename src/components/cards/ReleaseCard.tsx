@@ -27,7 +27,7 @@ export function ReleaseCard({ release }: ReleaseCardProps) {
     return (
         <div className="animate-fade-in">
             <Link href={`/releases/${release.id}`} className="block group">
-                <div className="relative aspect-square rounded-xl overflow-hidden mb-3 bg-muted">
+                <div className="relative aspect-square rounded-[22px] overflow-hidden mb-3 bg-muted/40 shadow-sm ring-1 ring-black/5">
                     <Image
                         src={release.cover_url}
                         alt={release.title}

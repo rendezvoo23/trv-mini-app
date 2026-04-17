@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from 'next';
-import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
 import { QueryProvider } from '@/components/QueryProvider';
 import { TelegramProvider } from '@/components/TelegramProvider';
@@ -30,8 +29,8 @@ export default function RootLayout({
       <body>
         <QueryProvider>
           <TelegramProvider>
-            <Header />
-            <main className="pt-14 pb-16 min-h-screen">{children}</main>
+            <div className="fixed inset-0 z-[-1] bg-gradient-to-b from-trv-blue/20 via-white to-white pointer-events-none" />
+            <main className="pb-24 min-h-screen relative">{children}</main>
             <BottomNav />
           </TelegramProvider>
         </QueryProvider>
