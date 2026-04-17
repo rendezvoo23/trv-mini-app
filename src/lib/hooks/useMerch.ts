@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { getMerchItems, getMerchById } from '@/lib/services/merch';
-import { MerchSort } from '@/types';
+import { MerchSort } from '@/domain/view-models';
 
 export function useMerchItems(sort: MerchSort = 'newest') {
     return useQuery({

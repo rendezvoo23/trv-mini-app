@@ -1,78 +1,118 @@
-import { mockArtists } from '@/data/mockArtists';
-import { mockReleaseArtists } from '@/data/mockReleaseArtists';
-import { mockReleases } from '@/data/mockReleases';
-import { mockGenres } from '@/data/mockGenres';
-import { mockMerch } from '@/data/mockMerch';
+import { matchesMemberFilter } from '@/domain/config';
+import { ArtistDetailViewModel, ArtistListItemViewModel, MemberFilterCategory } from '@/domain/view-models';
 import {
-    Artist,
-    ArtistRole,
-    ArtistWithRelations,
-    ReleaseWithArtists,
-    MerchItem,
-} from '@/types';
+    getArtistByIdRepository,
+    getArtistsRepository,
+    getMerchItemsRepository,
+    getReleaseByIdRepository,
+    getReleaseContributorsByArtistIdRepository,
+    getReleaseContributorsByReleaseIdRepository,
+} from '@/lib/repositories/mockRepository';
+import {
+    mapArtistListItem,
+    mapMerchSummary,
+    mapReleaseSummary,
+} from '@/lib/services/viewModelMappers';
 
-function enrichReleaseForArtist(releaseId: string): ReleaseWithArtists | null {
-    const release = mockReleases.find((r) => r.id === releaseId);
-    if (!release) return null;
-
-    const raEntries = mockReleaseArtists.filter(
-        (ra) => ra.release_id === release.id
+export async function getArtists(
+    filter: MemberFilterCategory = 'All'
+): Promise<ArtistListItemViewModel[]> {
+    const artists = (await getArtistsRepository()).filter(
+        (artist) => artist.status === 'published'
     );
-    const artists = raEntries
-        .map((ra) => {
-            const artist = mockArtists.find((a) => a.id === ra.artist_id);
-            if (!artist) return null;
-            return { artist, role: ra.role };
-        })
-        .filter(Boolean) as ReleaseWithArtists['artists'];
+    const artistItems = await Promise.all(artists.map(mapArtistListItem));
 
-    const genre = mockGenres.find((g) => g.id === release.genre_id) || {
-        id: '',
-        name: 'Unknown',
-    };
-
-    return { ...release, artists, genre };
-}
-
-export async function getArtists(role?: ArtistRole): Promise<Artist[]> {
-    if (!role) return mockArtists;
-    return mockArtists.filter((a) => a.role === role);
+    return artistItems.filter((artist) =>
+        matchesMemberFilter(artist.roleKeys, filter)
+    );
 }
 
 export async function getArtistById(
     id: string
-): Promise<ArtistWithRelations | null> {
-    const artist = mockArtists.find((a) => a.id === id);
-    if (!artist) return null;
+): Promise<ArtistDetailViewModel | null> {
+    const artist = await getArtistByIdRepository(id);
+    if (!artist || artist.status !== 'published') {
+        return null;
+    }
 
-    // Find all releases where this artist is main or feat
-    const mainFeatReleaseIds = mockReleaseArtists
-        .filter(
-            (ra) =>
-                ra.artist_id === id && (ra.role === 'main' || ra.role === 'feat')
+    const [artistItem, allContributions, allMerchItems] = await Promise.all([
+        mapArtistListItem(artist),
+        getReleaseContributorsByArtistIdRepository(id),
+        getMerchItemsRepository(),
+    ]);
+
+    const artistReleaseIds = new Set(
+        allContributions
+            .filter(
+                (contribution) =>
+                    contribution.contributor_role === 'main' ||
+                    contribution.contributor_role === 'featured'
+            )
+            .map((contribution) => contribution.release_id)
+    );
+    const supportReleaseIds = new Set(
+        allContributions
+            .filter(
+                (contribution) =>
+                    contribution.contributor_role !== 'main' &&
+                    contribution.contributor_role !== 'featured'
+            )
+            .map((contribution) => contribution.release_id)
+    );
+
+    const artistReleases = (
+        await Promise.all(
+            Array.from(artistReleaseIds).map(async (releaseId) => {
+                const release = await getReleaseByIdRepository(releaseId);
+                if (!release || release.status !== 'published') {
+                    return null;
+                }
+
+                const contributors = await getReleaseContributorsByReleaseIdRepository(
+                    releaseId
+                );
+                return mapReleaseSummary(release, contributors);
+            })
         )
-        .map((ra) => ra.release_id);
+    ).filter(
+        (release): release is NonNullable<typeof release> => Boolean(release)
+    );
 
-    const releases = mainFeatReleaseIds
-        .map((rid) => enrichReleaseForArtist(rid)!)
-        .filter(Boolean);
+    const supportReleases = (
+        await Promise.all(
+            Array.from(supportReleaseIds).map(async (releaseId) => {
+                const release = await getReleaseByIdRepository(releaseId);
+                if (!release || release.status !== 'published') {
+                    return null;
+                }
 
-    // Find all releases where this artist is a producer
-    const producedReleaseIds = mockReleaseArtists
-        .filter((ra) => ra.artist_id === id && ra.role === 'producer')
-        .map((ra) => ra.release_id);
+                const contributors = await getReleaseContributorsByReleaseIdRepository(
+                    releaseId
+                );
+                return mapReleaseSummary(release, contributors);
+            })
+        )
+    ).filter(
+        (release): release is NonNullable<typeof release> => Boolean(release)
+    );
 
-    const producedReleases = producedReleaseIds
-        .map((rid) => enrichReleaseForArtist(rid)!)
-        .filter(Boolean);
-
-    // Find merch associated with this artist
-    const merch: MerchItem[] = mockMerch.filter((m) => m.artist_id === id);
+    const merchItems = (
+        await Promise.all(
+            allMerchItems
+                .filter(
+                    (item) =>
+                        item.primary_artist_id === artist.id &&
+                        item.status === 'published'
+                )
+                .map(mapMerchSummary)
+        )
+    ).filter((item) => Boolean(item));
 
     return {
-        ...artist,
-        releases,
-        producedReleases: producedReleases,
-        merch,
+        ...artistItem,
+        bio: artist.bio,
+        artistReleases,
+        supportReleases,
+        merchItems,
     };
 }

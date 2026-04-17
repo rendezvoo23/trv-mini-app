@@ -33,14 +33,7 @@ export default function ReleaseDetailPage() {
         );
     }
 
-    const mainArtists = release.artists
-        .filter((a) => a.role === 'main' || a.role === 'feat')
-        .map((a) => (a.role === 'feat' ? `feat. ${a.artist.name}` : a.artist.name))
-        .join(', ');
-
-    const producers = release.artists
-        .filter((a) => a.role === 'producer')
-        .map((a) => a.artist.name);
+    const listenLink = release.listenLink;
 
     return (
         <div className="animate-fade-in">
@@ -55,15 +48,17 @@ export default function ReleaseDetailPage() {
 
             {/* Cover */}
             <div className="w-full relative aspect-square bg-muted shadow-sm">
-                <Image
-                    src={release.cover_url}
-                    alt={release.title}
-                    fill
-                    sizes="100vw"
-                    className="object-cover"
-                    priority
-                />
-                {release.is_upcoming && (
+                {release.cover && (
+                    <Image
+                        src={release.cover.url}
+                        alt={release.cover.alt}
+                        fill
+                        sizes="100vw"
+                        className="object-cover"
+                        priority
+                    />
+                )}
+                {release.isUpcoming && (
                     <div className="absolute top-4 right-4">
                         <Badge className="bg-white/90 backdrop-blur-md text-trv-blue font-bold text-xs px-3 py-1.5 shadow-lg">
                             UPCOMING
@@ -74,26 +69,29 @@ export default function ReleaseDetailPage() {
 
             {/* Info */}
             <div className="px-5 py-6 flex flex-col min-h-[300px]">
-                <div className="flex items-start justify-between">
+                <div className="text-[13px] font-medium text-[#8A8A8E] mb-1.5">
+                    {release.typeLabel}
+                </div>
+
+                <div className="flex items-center justify-between">
                     <div>
-                        <div className="text-[13px] font-medium text-[#8A8A8E] mb-1">
-                            {release.type}
-                        </div>
                         <h1 className="text-[28px] leading-tight font-medium text-foreground tracking-[-0.02em] max-w-[200px]">
                             {release.title}
                         </h1>
                         <p className="text-[17px] font-medium text-[#8A8A8E] mt-0.5 tracking-tight">
-                            {mainArtists}
+                            {release.artistLine}
                         </p>
                     </div>
 
-                    <Button
-                        className="bg-trv-blue hover:bg-trv-blue-dark text-white font-bold rounded-2xl h-[46px] px-6 text-[15px] flex items-center gap-2 shadow-sm transition-transform active:scale-95"
-                        onClick={() => openExternalLink(release.listen_url)}
-                    >
-                        <Play className="w-5 h-5 fill-white" />
-                        Слушать
-                    </Button>
+                    {listenLink && (
+                        <Button
+                            className="bg-[#007AFF] hover:bg-[#007AFF]/90 text-white font-bold rounded-[14px] h-[46px] px-6 text-[15px] flex items-center gap-2 shadow-sm transition-transform active:scale-95"
+                            onClick={() => openExternalLink(listenLink.url)}
+                        >
+                            <Play className="w-5 h-5 fill-white" />
+                            {listenLink.label}
+                        </Button>
+                    )}
                 </div>
 
                 <div className="mt-8 space-y-6">
@@ -101,11 +99,11 @@ export default function ReleaseDetailPage() {
                         {release.description}
                     </p>
 
-                    {producers.length > 0 && (
+                    {release.producerLine && (
                         <p className="text-[13px] text-[#8A8A8E]">
                             Produced by{' '}
                             <span className="font-medium text-foreground">
-                                {producers.join(', ')}
+                                {release.producerLine}
                             </span>
                         </p>
                     )}

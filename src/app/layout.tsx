@@ -29,7 +29,7 @@ export default function RootLayout({
       <body>
         <QueryProvider>
           <TelegramProvider>
-            <div className="fixed inset-0 z-[-1] bg-gradient-to-b from-trv-blue/20 via-white to-white pointer-events-none" />
+            <div className="fixed inset-0 z-[-1] bg-gradient-to-b from-[#2855FF]/90 via-white to-white pointer-events-none" />
             <main className="pb-24 min-h-screen relative">{children}</main>
             <BottomNav />
           </TelegramProvider>

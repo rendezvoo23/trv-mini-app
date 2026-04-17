@@ -5,30 +5,13 @@ import { useUIStore } from '@/store/uiStore';
 import { MemberCard } from '@/components/cards/MemberCard';
 import { MemberCardSkeleton } from '@/components/skeletons/MemberCardSkeleton';
 import { FilterTabs } from '@/components/FilterTabs';
-import { ArtistRole, MemberFilterCategory } from '@/types';
+import { MEMBER_FILTER_OPTIONS } from '@/domain/config';
 
 import Image from 'next/image';
 
-const filterOptions: MemberFilterCategory[] = [
-    'All',
-    'Artists',
-    'Producers',
-    'Designers',
-    'DJs',
-];
-
-const filterToRole: Record<MemberFilterCategory, ArtistRole | undefined> = {
-    All: undefined,
-    Artists: 'artist',
-    Producers: 'producer',
-    Designers: 'designer',
-    DJs: 'dj',
-};
-
 export default function ArtistsPage() {
     const { memberFilter, setMemberFilter } = useUIStore();
-    const role = filterToRole[memberFilter];
-    const { data: artists, isLoading } = useArtists(role);
+    const { data: artists, isLoading } = useArtists(memberFilter);
 
     return (
         <div className="space-y-6">
@@ -55,7 +38,7 @@ export default function ArtistsPage() {
             {/* Filter Tabs */}
             <div className="pt-0">
                 <FilterTabs
-                    options={filterOptions}
+                    options={MEMBER_FILTER_OPTIONS}
                     activeOption={memberFilter}
                     onSelect={setMemberFilter}
                 />

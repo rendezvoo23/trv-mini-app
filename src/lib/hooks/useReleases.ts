@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { getReleases, getReleaseById } from '@/lib/services/releases';
-import { ReleaseSort } from '@/types';
+import { ReleaseSort } from '@/domain/view-models';
 
 export function useReleases(sort: ReleaseSort = 'newest') {
     return useQuery({

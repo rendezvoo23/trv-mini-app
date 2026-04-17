@@ -2,12 +2,12 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { getArtists, getArtistById } from '@/lib/services/artists';
-import { ArtistRole } from '@/types';
+import { MemberFilterCategory } from '@/domain/view-models';
 
-export function useArtists(role?: ArtistRole) {
+export function useArtists(filter: MemberFilterCategory = 'All') {
     return useQuery({
-        queryKey: ['artists', role ?? 'all'],
-        queryFn: () => getArtists(role),
+        queryKey: ['artists', filter],
+        queryFn: () => getArtists(filter),
     });
 }
 

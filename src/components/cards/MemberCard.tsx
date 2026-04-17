@@ -2,10 +2,10 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Artist } from '@/types';
+import { ArtistListItemViewModel } from '@/domain/view-models';
 
 interface MemberCardProps {
-    artist: Artist;
+    artist: ArtistListItemViewModel;
 }
 
 export function MemberCard({ artist }: MemberCardProps) {
@@ -15,14 +15,16 @@ export function MemberCard({ artist }: MemberCardProps) {
             className="flex flex-col items-center group animate-fade-in active:scale-95 transition-transform"
         >
             <div className="relative w-36 h-36 rounded-full overflow-hidden mb-3 bg-muted/30 ring-2 ring-transparent group-hover:ring-trv-blue/50 shadow-sm transition-all duration-300">
-                <Image
-                    src={artist.photo_url}
-                    alt={artist.name}
-                    fill
-                    sizes="144px"
-                    className="object-cover"
-                    loading="lazy"
-                />
+                {artist.photo && (
+                    <Image
+                        src={artist.photo.url}
+                        alt={artist.photo.alt}
+                        fill
+                        sizes="144px"
+                        className="object-cover"
+                        loading="lazy"
+                    />
+                )}
             </div>
             <h3 className="text-[15px] font-medium text-foreground text-center tracking-tight">
                 {artist.name}
