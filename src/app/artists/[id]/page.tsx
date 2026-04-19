@@ -11,7 +11,7 @@ import { MerchCard } from '@/components/cards/MerchCard';
 export default function ArtistDetailPage() {
     const params = useParams();
     const router = useRouter();
-    const { data: artist, isLoading } = useArtist(params.id as string);
+    const { data: artist, isLoading, isError } = useArtist(params.id as string);
 
     if (isLoading) {
         return (
@@ -22,6 +22,16 @@ export default function ArtistDetailPage() {
                 <Skeleton className="h-6 w-40 mx-auto" />
                 <Skeleton className="h-4 w-24 mx-auto" />
                 <Skeleton className="h-20 w-full" />
+            </div>
+        );
+    }
+
+    if (isError) {
+        return (
+            <div className="flex items-center justify-center min-h-[50vh] px-6 text-center">
+                <p className="text-muted-foreground">
+                    Unable to load this member right now.
+                </p>
             </div>
         );
     }
