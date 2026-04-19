@@ -11,7 +11,7 @@ import Image from 'next/image';
 
 export default function ArtistsPage() {
     const { memberFilter, setMemberFilter } = useUIStore();
-    const { data: artists, isLoading } = useArtists(memberFilter);
+    const { data: artists, isLoading, isError } = useArtists(memberFilter);
 
     return (
         <div className="space-y-6">
@@ -47,13 +47,19 @@ export default function ArtistsPage() {
             {/* Members Grid */}
             <section className="px-5">
                 <div className="grid grid-cols-2 gap-x-5 gap-y-10">
-                    {isLoading
-                        ? Array.from({ length: 6 }).map((_, i) => (
+                    {isLoading ? (
+                        Array.from({ length: 6 }).map((_, i) => (
                             <MemberCardSkeleton key={i} />
                         ))
-                        : artists?.map((artist) => (
+                    ) : isError ? (
+                        <p className="text-sm text-muted-foreground col-span-2 py-4">
+                            Unable to load members right now.
+                        </p>
+                    ) : (
+                        artists?.map((artist) => (
                             <MemberCard key={artist.id} artist={artist} />
-                        ))}
+                        ))
+                    )}
                 </div>
             </section>
         </div>

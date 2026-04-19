@@ -12,7 +12,7 @@ import { Play } from 'lucide-react';
 export default function ReleaseDetailPage() {
     const params = useParams();
     const router = useRouter();
-    const { data: release, isLoading } = useRelease(params.id as string);
+    const { data: release, isLoading, isError } = useRelease(params.id as string);
 
     if (isLoading) {
         return (
@@ -21,6 +21,16 @@ export default function ReleaseDetailPage() {
                 <Skeleton className="h-6 w-48" />
                 <Skeleton className="h-4 w-32" />
                 <Skeleton className="h-20 w-full" />
+            </div>
+        );
+    }
+
+    if (isError) {
+        return (
+            <div className="flex items-center justify-center min-h-[50vh] px-6 text-center">
+                <p className="text-muted-foreground">
+                    Unable to load this release right now.
+                </p>
             </div>
         );
     }

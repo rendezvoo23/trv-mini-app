@@ -6,7 +6,7 @@ import { ReleaseCardSkeleton } from '@/components/skeletons/ReleaseCardSkeleton'
 import Image from 'next/image';
 
 export default function ReleasesPage() {
-    const { data: releases, isLoading } = useReleases('newest');
+    const { data: releases, isLoading, isError } = useReleases('newest');
 
     return (
         <div className="space-y-6 pt-12">
@@ -24,13 +24,19 @@ export default function ReleasesPage() {
 
             {/* Releases List */}
             <section className="px-5 space-y-8">
-                {isLoading
-                    ? Array.from({ length: 2 }).map((_, i) => (
+                {isLoading ? (
+                    Array.from({ length: 2 }).map((_, i) => (
                         <ReleaseCardSkeleton key={i} />
                     ))
-                    : releases?.map((release) => (
+                ) : isError ? (
+                    <p className="text-sm text-muted-foreground py-4">
+                        Unable to load releases right now.
+                    </p>
+                ) : (
+                    releases?.map((release) => (
                         <ReleaseCard key={release.id} release={release} />
-                    ))}
+                    ))
+                )}
             </section>
         </div>
     );

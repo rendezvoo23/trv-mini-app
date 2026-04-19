@@ -1,4 +1,8 @@
 /** @type {import('next').NextConfig} */
+const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
+  ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
+  : null;
+
 const nextConfig = {
   images: {
     remotePatterns: [
@@ -6,6 +10,14 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'placehold.co',
       },
+      ...(supabaseHost
+        ? [
+            {
+              protocol: 'https',
+              hostname: supabaseHost,
+            },
+          ]
+        : []),
     ],
   },
 };
