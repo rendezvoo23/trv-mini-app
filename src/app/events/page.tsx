@@ -5,7 +5,7 @@ import { EventCard } from '@/components/cards/EventCard';
 import { EventCardSkeleton } from '@/components/skeletons/EventCardSkeleton';
 
 export default function EventsPage() {
-    const { data, isLoading } = useEvents();
+    const { data, isLoading, isError } = useEvents();
 
     return (
         <div className="space-y-6 pt-4">
@@ -18,6 +18,10 @@ export default function EventsPage() {
                     Array.from({ length: 2 }).map((_, i) => (
                         <EventCardSkeleton key={i} />
                     ))
+                ) : isError ? (
+                    <p className="text-sm text-muted-foreground py-4">
+                        Unable to load events right now.
+                    </p>
                 ) : data?.upcoming.length === 0 ? (
                     <p className="text-sm text-muted-foreground py-4">
                         No upcoming events
@@ -38,6 +42,10 @@ export default function EventsPage() {
                     Array.from({ length: 2 }).map((_, i) => (
                         <EventCardSkeleton key={i} />
                     ))
+                ) : isError ? (
+                    <p className="text-sm text-muted-foreground py-4">
+                        Unable to load events right now.
+                    </p>
                 ) : data?.past.length === 0 ? (
                     <p className="text-sm text-muted-foreground py-4">No past events</p>
                 ) : (

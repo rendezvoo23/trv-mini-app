@@ -15,7 +15,7 @@ import { useState } from 'react';
 export default function EventDetailPage() {
     const params = useParams();
     const router = useRouter();
-    const { data: event, isLoading } = useEvent(params.id as string);
+    const { data: event, isLoading, isError } = useEvent(params.id as string);
     const [promoCode, setPromoCode] = useState('');
 
     if (isLoading) {
@@ -25,6 +25,16 @@ export default function EventDetailPage() {
                 <Skeleton className="h-6 w-48" />
                 <Skeleton className="h-4 w-32" />
                 <Skeleton className="h-20 w-full" />
+            </div>
+        );
+    }
+
+    if (isError) {
+        return (
+            <div className="flex items-center justify-center min-h-[50vh] px-6 text-center">
+                <p className="text-muted-foreground">
+                    Unable to load this event right now.
+                </p>
             </div>
         );
     }

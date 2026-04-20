@@ -31,8 +31,9 @@ import {
 } from '@/data/mockDatabase';
 
 // Phase 1 note:
-// This mock repository remains in use for merch/events and shared mock helpers.
-// Releases and artists now read from Supabase through `supabaseReadRepository.ts`.
+// This mock repository remains in use for merch and shared mock helpers.
+// Releases, artists, and events now read from Supabase through
+// `supabaseReadRepository.ts`.
 
 function sortByOrder<T extends { sort_order: number }>(items: T[]) {
     return [...items].sort((a, b) => a.sort_order - b.sort_order);

@@ -1,18 +1,29 @@
 import { EventDetailViewModel, EventSummaryViewModel } from '@/domain/view-models';
 import {
-    getEventByIdRepository,
-    getEventsRepository,
-} from '@/lib/repositories/mockRepository';
-import { mapEventDetail, mapEventSummary } from '@/lib/services/viewModelMappers';
+    getEventGalleryAssignments,
+    getPublishedEventRowById,
+    getPublishedEventRows,
+} from '@/lib/repositories/supabaseReadRepository';
+import { createClient } from '@/lib/supabase/client';
+import { isSupabaseConfigured } from '@/lib/supabase/config';
+import {
+    mapEventRowToDetail,
+    mapEventRowToSummary,
+} from '@/lib/supabase/mappers';
 
 export async function getEvents(): Promise<{
     upcoming: EventSummaryViewModel[];
     past: EventSummaryViewModel[];
 }> {
-    const events = (await getEventsRepository()).filter(
-        (event) => event.status === 'published'
+    if (!isSupabaseConfigured()) {
+        throw new Error('Supabase is not configured for events.');
+    }
+
+    const supabase = createClient();
+    const eventRows = await getPublishedEventRows(supabase);
+    const mappedEvents = eventRows.map((event) =>
+        mapEventRowToSummary(supabase, event)
     );
-    const mappedEvents = await Promise.all(events.map(mapEventSummary));
 
     const upcoming = mappedEvents
         .filter((event) => event.isUpcoming)
@@ -32,10 +43,16 @@ export async function getEvents(): Promise<{
 export async function getEventById(
     id: string
 ): Promise<EventDetailViewModel | null> {
-    const event = await getEventByIdRepository(id);
-    if (!event || event.status !== 'published') {
+    if (!isSupabaseConfigured()) {
+        throw new Error('Supabase is not configured for events.');
+    }
+
+    const supabase = createClient();
+    const event = await getPublishedEventRowById(supabase, id);
+    if (!event) {
         return null;
     }
 
-    return mapEventDetail(event);
+    const galleryAssignments = await getEventGalleryAssignments(supabase, id);
+    return mapEventRowToDetail(supabase, event, galleryAssignments);
 }

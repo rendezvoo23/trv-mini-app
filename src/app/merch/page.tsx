@@ -1,13 +1,19 @@
 'use client';
 
+import { isPublicSectionEnabled } from '@/domain/featureFlags';
 import { useMerchItems } from '@/lib/hooks/useMerch';
 import { useUIStore } from '@/store/uiStore';
 import { MerchCard } from '@/components/cards/MerchCard';
 import { MerchCardSkeleton } from '@/components/skeletons/MerchCardSkeleton';
 import { FilterTabs } from '@/components/FilterTabs';
 import { MERCH_SORT_OPTIONS } from '@/domain/config';
+import { redirect } from 'next/navigation';
 
 export default function MerchPage() {
+    if (!isPublicSectionEnabled('merch')) {
+        redirect('/releases');
+    }
+
     const { merchSort, setMerchSort } = useUIStore();
     const { data: items, isLoading } = useMerchItems(merchSort);
 

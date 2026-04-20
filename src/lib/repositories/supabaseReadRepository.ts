@@ -2,6 +2,8 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import {
     SupabaseArtistReleaseContributionRow,
     SupabaseArtistRow,
+    SupabaseEntityMediaAssignmentRow,
+    SupabaseEventRow,
     SupabaseReleaseRow,
 } from '@/lib/supabase/types';
 
@@ -22,6 +24,7 @@ const RELEASE_SELECT = `
     cover:media_assets!releases_cover_asset_id_fkey(
         id,
         media_kind,
+        mime_type,
         storage_bucket,
         storage_path,
         external_url,
@@ -31,6 +34,7 @@ const RELEASE_SELECT = `
     ),
     release_contributors(
         credit_order,
+        role_slug,
         role:release_contributor_roles!release_contributors_role_slug_fkey(
             slug,
             name,
@@ -72,6 +76,7 @@ const ARTIST_SELECT = `
     photo:media_assets!artists_photo_asset_id_fkey(
         id,
         media_kind,
+        mime_type,
         storage_bucket,
         storage_path,
         external_url,
@@ -86,6 +91,47 @@ const ARTIST_SELECT = `
             name,
             sort_order
         )
+    )
+`;
+
+const EVENT_SELECT = `
+    id,
+    slug,
+    name,
+    description,
+    starts_at,
+    ends_at,
+    timezone,
+    venue_name,
+    city,
+    age_restriction,
+    status,
+    published_at,
+    sort_order,
+    event_type:event_types!events_event_type_slug_fkey(
+        slug,
+        name,
+        sort_order
+    ),
+    poster:media_assets!events_poster_asset_id_fkey(
+        id,
+        media_kind,
+        mime_type,
+        storage_bucket,
+        storage_path,
+        external_url,
+        alt_text,
+        width,
+        height
+    ),
+    external_links(
+        id,
+        label,
+        url,
+        link_kind,
+        provider,
+        sort_order,
+        is_primary
     )
 `;
 
@@ -203,4 +249,76 @@ export async function getArtistReleaseContributionRows(
     }
 
     return (data ?? []) as SupabaseArtistReleaseContributionRow[];
+}
+
+export async function getPublishedEventRows(
+    supabase: SupabaseClient
+): Promise<SupabaseEventRow[]> {
+    const { data, error } = await supabase
+        .from('events')
+        .select(EVENT_SELECT)
+        .eq('status', 'published');
+
+    if (error) {
+        throw error;
+    }
+
+    return sortByOrder((data ?? []) as unknown as SupabaseEventRow[]);
+}
+
+export async function getPublishedEventRowById(
+    supabase: SupabaseClient,
+    id: string
+): Promise<SupabaseEventRow | null> {
+    const { data, error } = await supabase
+        .from('events')
+        .select(EVENT_SELECT)
+        .eq('status', 'published')
+        .eq('id', id)
+        .maybeSingle();
+
+    if (error) {
+        throw error;
+    }
+
+    return (data as unknown as SupabaseEventRow | null) ?? null;
+}
+
+export async function getEventGalleryAssignments(
+    supabase: SupabaseClient,
+    eventId: string
+): Promise<SupabaseEntityMediaAssignmentRow[]> {
+    try {
+        const { data, error } = await supabase
+            .from('entity_media_assignments')
+            .select(
+                `
+                    sort_order,
+                    media_role,
+                    media_asset:media_assets!entity_media_assignments_media_asset_id_fkey(
+                        id,
+                        media_kind,
+                        mime_type,
+                        storage_bucket,
+                        storage_path,
+                        external_url,
+                        alt_text,
+                        width,
+                        height
+                    )
+                `
+            )
+            .eq('target_type', 'event')
+            .eq('target_id', eventId)
+            .eq('media_role', 'gallery')
+            .order('sort_order', { ascending: true });
+
+        if (error) {
+            throw error;
+        }
+
+        return (data ?? []) as unknown as SupabaseEntityMediaAssignmentRow[];
+    } catch {
+        return [];
+    }
 }

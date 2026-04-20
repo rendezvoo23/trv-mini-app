@@ -1,7 +1,8 @@
 'use client';
 
+import { isPublicSectionEnabled } from '@/domain/featureFlags';
 import { useMerch } from '@/lib/hooks/useMerch';
-import { useParams, useRouter } from 'next/navigation';
+import { redirect, useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,10 @@ import { openExternalLink } from '@/lib/telegram';
 import { useState } from 'react';
 
 export default function MerchDetailPage() {
+    if (!isPublicSectionEnabled('merch')) {
+        redirect('/releases');
+    }
+
     const params = useParams();
     const router = useRouter();
     const { data: item, isLoading } = useMerch(params.id as string);
