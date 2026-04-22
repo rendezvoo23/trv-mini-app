@@ -1,6 +1,11 @@
 import { PublishableFields, TimestampFields } from '@/domain/shared';
 
-export type ArtistRoleKey = 'artist' | 'producer' | 'designer' | 'dj';
+export type ArtistRoleKey =
+    | 'artist'
+    | 'producer'
+    | 'designer'
+    | 'dj'
+    | 'beatmaker';
 export type ReleaseType = 'single' | 'ep' | 'album' | 'mixtape';
 export type ReleaseContributorRole =
     | 'main'

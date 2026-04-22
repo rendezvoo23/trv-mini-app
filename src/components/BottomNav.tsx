@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { isPublicSectionEnabled } from '@/domain/featureFlags';
 import { cn } from '@/lib/utils';
 
 const tabs = [
@@ -9,7 +10,9 @@ const tabs = [
     { label: 'Участники', href: '/artists', id: 'artists' },
     { label: 'Мерч', href: '/merch', id: 'merch' },
     { label: 'Мероприятия', href: '/events', id: 'events' },
-];
+] as const;
+
+const visibleTabs = tabs.filter((tab) => isPublicSectionEnabled(tab.id));
 
 function ShapeIcon({ id, isActive }: { id: string; isActive: boolean }) {
     const colorClass = isActive ? 'fill-[#007AFF]' : 'fill-[#1C1C1E]'; // Apple Blue vs Dark
@@ -64,7 +67,7 @@ export function BottomNav() {
             >
                 <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent pointer-events-none" />
                 <div className="flex items-center justify-around h-[66px] relative z-10 w-full px-2">
-                    {tabs.map((tab) => {
+                    {visibleTabs.map((tab) => {
                         const isActive =
                             pathname === tab.href || pathname.startsWith(tab.href + '/');
 

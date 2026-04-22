@@ -9,6 +9,7 @@ export interface SupabaseLookupRow {
 export interface SupabaseMediaAssetRow {
     id: string;
     media_kind: string;
+    mime_type: string | null;
     storage_bucket: string | null;
     storage_path: string | null;
     external_url: string | null;
@@ -53,6 +54,7 @@ export interface SupabaseArtistRow {
 
 export interface SupabaseReleaseContributorRow {
     credit_order: number;
+    role_slug: string;
     role: SupabaseMaybeMany<SupabaseLookupRow>;
     artist: SupabaseMaybeMany<SupabaseArtistReferenceRow>;
 }
@@ -84,4 +86,29 @@ export interface SupabaseReleaseRow {
 export interface SupabaseArtistReleaseContributionRow {
     release_id: string;
     role_slug: string;
+}
+
+export interface SupabaseEntityMediaAssignmentRow {
+    sort_order: number;
+    media_role: string;
+    media_asset: SupabaseMaybeMany<SupabaseMediaAssetRow>;
+}
+
+export interface SupabaseEventRow {
+    id: string;
+    slug: string;
+    name: string;
+    description: string;
+    starts_at: string;
+    ends_at: string | null;
+    timezone: string;
+    venue_name: string;
+    city: string;
+    age_restriction: string;
+    status: 'draft' | 'published' | 'archived';
+    published_at: string | null;
+    sort_order: number;
+    event_type: SupabaseMaybeMany<SupabaseLookupRow>;
+    poster: SupabaseMaybeMany<SupabaseMediaAssetRow>;
+    external_links: SupabaseExternalLinkRow[] | null;
 }

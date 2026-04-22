@@ -1,7 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { BottomNav } from '@/components/BottomNav';
-import { QueryProvider } from '@/components/QueryProvider';
-import { TelegramProvider } from '@/components/TelegramProvider';
+import { RootShell } from '@/components/RootShell';
 import './globals.css';
 
 export const viewport: Viewport = {
@@ -27,13 +25,7 @@ export default function RootLayout({
         <script src="https://telegram.org/js/telegram-web-app.js" defer />
       </head>
       <body>
-        <QueryProvider>
-          <TelegramProvider>
-            <div className="fixed inset-0 z-[-1] bg-gradient-to-b from-[#2855FF]/90 via-white to-white pointer-events-none" />
-            <main className="pb-24 min-h-screen relative">{children}</main>
-            <BottomNav />
-          </TelegramProvider>
-        </QueryProvider>
+        <RootShell>{children}</RootShell>
       </body>
     </html>
   );

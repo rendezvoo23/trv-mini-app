@@ -1,17 +1,19 @@
 'use client';
 
 import { useArtist } from '@/lib/hooks/useArtists';
+import { isPublicSectionEnabled } from '@/domain/featureFlags';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ReleaseCard } from '@/components/cards/ReleaseCard';
 import { MerchCard } from '@/components/cards/MerchCard';
+import { ReleaseCard } from '@/components/cards/ReleaseCard';
 
 export default function ArtistDetailPage() {
     const params = useParams();
     const router = useRouter();
     const { data: artist, isLoading, isError } = useArtist(params.id as string);
+    const showPublicMerch = isPublicSectionEnabled('merch');
 
     if (isLoading) {
         return (
@@ -114,8 +116,7 @@ export default function ArtistDetailPage() {
                 </section>
             )}
 
-            {/* Merch */}
-            {artist.merchItems.length > 0 && (
+            {showPublicMerch && artist.merchItems.length > 0 && (
                 <section className="px-4 pb-6 space-y-4">
                     <h2 className="text-xs font-bold uppercase tracking-widest text-trv-blue">
                         Merch

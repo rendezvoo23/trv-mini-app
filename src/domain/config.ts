@@ -32,6 +32,7 @@ export const ARTIST_ROLE_LABELS: Record<ArtistRoleKey, string> = {
     producer: 'Producer',
     designer: 'Designer',
     dj: 'DJ',
+    beatmaker: 'Beatmaker',
 };
 
 export const RELEASE_TYPE_LABELS: Record<ReleaseType, string> = {

@@ -3,14 +3,23 @@ import {
     ArtistDetailViewModel,
     ArtistListItemViewModel,
     ArtistReferenceViewModel,
+    EventDetailViewModel,
+    EventSummaryViewModel,
     ExternalLinkViewModel,
     MediaViewModel,
     ReleaseContributorViewModel,
     ReleaseDetailViewModel,
     ReleaseSummaryViewModel,
 } from '@/domain/view-models';
+import { getReleaseContributorRoleLabel } from '@/domain/config';
+import {
+    getSupabaseStoragePublicUrl,
+    normalizeStoragePath,
+} from '@/lib/supabase/media';
 import {
     SupabaseArtistRow,
+    SupabaseEntityMediaAssignmentRow,
+    SupabaseEventRow,
     SupabaseExternalLinkRow,
     SupabaseMediaAssetRow,
     SupabaseMaybeMany,
@@ -97,6 +106,43 @@ function buildArtistLine(contributors: ReleaseContributorViewModel[]) {
     return `${mainLine} feat. ${featuredArtists.join(', ')}`;
 }
 
+function normalizeReleaseContributorRole(
+    role: { slug?: string; name?: string }
+): ReleaseContributorViewModel['role'] | null {
+    const slug = role.slug?.trim().toLowerCase();
+    const label = role.name?.trim().toLowerCase();
+    const value = slug || label;
+
+    switch (value) {
+        case 'main':
+        case 'main artist':
+        case 'main_artist':
+        case 'main-artist':
+        case 'artist':
+        case 'primary':
+        case 'primary artist':
+        case 'primary_artist':
+        case 'primary-artist':
+            return 'main';
+        case 'featured':
+        case 'featured artist':
+        case 'featured_artist':
+        case 'featured-artist':
+        case 'feature':
+        case 'feat':
+            return 'featured';
+        case 'producer':
+            return 'producer';
+        case 'designer':
+        case 'design':
+            return 'designer';
+        case 'dj':
+            return 'dj';
+        default:
+            return null;
+    }
+}
+
 export function resolveMediaAssetUrl(
     supabase: SupabaseClient,
     asset: SupabaseMediaAssetRow | null | undefined
@@ -114,13 +160,24 @@ export function resolveMediaAssetUrl(
     }
 
     if (asset.storage_bucket && asset.storage_path) {
-        const { data } = supabase.storage
-            .from(asset.storage_bucket)
-            .getPublicUrl(asset.storage_path);
+        const normalizedPath = normalizeStoragePath(
+            asset.storage_path,
+            asset.storage_bucket
+        );
+        const publicUrl = normalizedPath
+            ? supabase.storage.from(asset.storage_bucket).getPublicUrl(normalizedPath)
+                  .data.publicUrl
+            : getSupabaseStoragePublicUrl(
+                  asset.storage_bucket,
+                  asset.storage_path
+              );
+        if (!publicUrl) {
+            return null;
+        }
 
         return {
             id: asset.id,
-            url: data.publicUrl,
+            url: publicUrl,
             alt: asset.alt_text ?? '',
         };
     }
@@ -166,17 +223,23 @@ function mapReleaseContributors(
             ...contributor,
             role: unwrapRelation(contributor.role),
             artist: unwrapRelation(contributor.artist),
+            normalizedRole: normalizeReleaseContributorRole({
+                slug: contributor.role_slug || unwrapRelation(contributor.role)?.slug,
+                name: unwrapRelation(contributor.role)?.name,
+            }),
         }))
         .filter(
             (contributor) =>
                 Boolean(contributor.artist) &&
-                Boolean(contributor.role) &&
+                Boolean(contributor.normalizedRole) &&
                 contributor.artist?.status === 'published'
         )
         .map(
             (contributor): ReleaseContributorViewModel => ({
-                role: contributor.role!.slug as ReleaseContributorViewModel['role'],
-                roleLabel: contributor.role!.name,
+                role: contributor.normalizedRole!,
+                roleLabel:
+                    contributor.role?.name ??
+                    getReleaseContributorRoleLabel(contributor.normalizedRole!),
                 artist: mapArtistReference(contributor.artist!),
             })
         );
@@ -238,5 +301,52 @@ export function mapArtistRowToDetail(
         artistReleases,
         supportReleases,
         merchItems: [],
+    };
+}
+
+function mapGalleryMedia(
+    supabase: SupabaseClient,
+    assignments: SupabaseEntityMediaAssignmentRow[]
+) {
+    return sortByNumber(assignments, (assignment) => assignment.sort_order)
+        .map((assignment) => unwrapRelation(assignment.media_asset))
+        .filter((asset): asset is NonNullable<typeof asset> => Boolean(asset))
+        .map((asset) => resolveMediaAssetUrl(supabase, asset))
+        .filter((asset): asset is MediaViewModel => Boolean(asset));
+}
+
+export function mapEventRowToSummary(
+    supabase: SupabaseClient,
+    event: SupabaseEventRow
+): EventSummaryViewModel {
+    const eventType = unwrapRelation(event.event_type);
+    const poster = unwrapRelation(event.poster);
+
+    return {
+        id: event.id,
+        slug: event.slug,
+        name: event.name,
+        eventType: (eventType?.slug ?? 'concert') as EventSummaryViewModel['eventType'],
+        eventTypeLabel: eventType?.name ?? 'Concert',
+        poster: resolveMediaAssetUrl(supabase, poster),
+        startsAt: event.starts_at,
+        venueName: event.venue_name,
+        city: event.city,
+        ageRestriction: event.age_restriction,
+        isUpcoming: getUpcomingFlag(event.starts_at),
+        ticketLink: mapExternalLink(getPrimaryLink(event.external_links, 'tickets')),
+        infoLink: mapExternalLink(getPrimaryLink(event.external_links, 'info')),
+    };
+}
+
+export function mapEventRowToDetail(
+    supabase: SupabaseClient,
+    event: SupabaseEventRow,
+    galleryAssignments: SupabaseEntityMediaAssignmentRow[]
+): EventDetailViewModel {
+    return {
+        ...mapEventRowToSummary(supabase, event),
+        description: event.description,
+        gallery: mapGalleryMedia(supabase, galleryAssignments),
     };
 }
