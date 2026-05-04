@@ -1,42 +1,34 @@
 'use client';
 
+import Image from 'next/image';
+import { MemberCard } from '@/components/cards/MemberCard';
+import { FilterTabs } from '@/components/FilterTabs';
+import { MemberCardSkeleton } from '@/components/skeletons/MemberCardSkeleton';
+import { MEMBER_FILTER_OPTIONS } from '@/domain/config';
 import { useArtists } from '@/lib/hooks/useArtists';
 import { useUIStore } from '@/store/uiStore';
-import { MemberCard } from '@/components/cards/MemberCard';
-import { MemberCardSkeleton } from '@/components/skeletons/MemberCardSkeleton';
-import { FilterTabs } from '@/components/FilterTabs';
-import { MEMBER_FILTER_OPTIONS } from '@/domain/config';
-
-import Image from 'next/image';
 
 export default function ArtistsPage() {
     const { memberFilter, setMemberFilter } = useUIStore();
     const { data: artists, isLoading, isError } = useArtists(memberFilter);
 
     return (
-        <div className="space-y-6">
-            {/* Header Section */}
-            <div className="px-5 pt-12 pb-2">
-                <div className="flex flex-col mb-5">
-                    <Image
-                        src="/trv-logo.svg"
-                        alt="TRV"
-                        width={160}
-                        height={36}
-                        className="brightness-0 invert mb-[-4px] select-none"
-                        priority
-                    />
-                    <h1 className="text-[42px] font-black tracking-[-0.04em] text-white leading-none select-none">
-                        MEMBERS
-                    </h1>
-                </div>
-                <p className="text-trv-blue-dark/60 text-[15px] font-medium max-w-[280px] leading-tight select-none mix-blend-color-burn">
-                    Состав электронных и экспериментальных визионеров от лейбла TRV.
-                </p>
-            </div>
+        <div
+            className="min-h-screen bg-[#f4f4f1] pb-24 pt-6 text-black"
+            style={{ fontFamily: 'Arial, sans-serif' }}
+        >
+            <header className="mb-8 flex items-center justify-center px-6">
+                <Image
+                    src="/trv-logo.svg"
+                    alt="TRV"
+                    width={140}
+                    height={40}
+                    priority
+                    className="h-auto w-[140px]"
+                />
+            </header>
 
-            {/* Filter Tabs */}
-            <div className="pt-0">
+            <div className="mb-4">
                 <FilterTabs
                     options={MEMBER_FILTER_OPTIONS}
                     activeOption={memberFilter}
@@ -44,15 +36,14 @@ export default function ArtistsPage() {
                 />
             </div>
 
-            {/* Members Grid */}
-            <section className="px-5">
-                <div className="grid grid-cols-2 gap-x-5 gap-y-10">
+            <section className="px-6">
+                <div className="grid grid-cols-2 gap-x-6 gap-y-10">
                     {isLoading ? (
                         Array.from({ length: 6 }).map((_, i) => (
                             <MemberCardSkeleton key={i} />
                         ))
                     ) : isError ? (
-                        <p className="text-sm text-muted-foreground col-span-2 py-4">
+                        <p className="col-span-2 border border-black px-4 py-3 text-sm text-black">
                             Unable to load members right now.
                         </p>
                     ) : (

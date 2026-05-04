@@ -3,11 +3,9 @@
 import { useRelease } from '@/lib/hooks/useReleases';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { openExternalLink } from '@/lib/telegram';
-import { Play } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 
 export default function ReleaseDetailPage() {
     const params = useParams();
@@ -16,19 +14,41 @@ export default function ReleaseDetailPage() {
 
     if (isLoading) {
         return (
-            <div className="space-y-4 p-4">
-                <Skeleton className="aspect-square rounded-xl" />
-                <Skeleton className="h-6 w-48" />
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-20 w-full" />
+            <div
+                className="min-h-screen bg-[#f4f4f1] px-6 pb-24 pt-6 text-black"
+                style={{ fontFamily: 'Arial, sans-serif' }}
+            >
+                <div className="mb-8 flex items-center justify-between">
+                    <Skeleton className="h-6 w-6 rounded-none bg-[#dddddd]" />
+                    <Skeleton className="h-8 w-32 rounded-none bg-[#dddddd]" />
+                    <div className="w-6" />
+                </div>
+                <Skeleton className="aspect-square w-full rounded-none bg-[#dddddd]" />
+                <div className="mt-6 grid grid-cols-[1fr_132px] gap-5">
+                    <div className="space-y-2">
+                        <Skeleton className="h-4 w-14 rounded-none bg-[#dddddd]" />
+                        <Skeleton className="h-8 w-32 rounded-none bg-[#dddddd]" />
+                        <Skeleton className="h-6 w-28 rounded-none bg-[#dddddd]" />
+                    </div>
+                    <Skeleton className="mt-4 h-[44px] w-full rounded-none bg-[#dddddd]" />
+                </div>
+                <Skeleton className="mt-8 h-px w-full rounded-none bg-[#dddddd]" />
+                <div className="mt-8 space-y-2">
+                    <Skeleton className="h-4 w-full rounded-none bg-[#dddddd]" />
+                    <Skeleton className="h-4 w-[92%] rounded-none bg-[#dddddd]" />
+                    <Skeleton className="h-4 w-[88%] rounded-none bg-[#dddddd]" />
+                </div>
             </div>
         );
     }
 
     if (isError) {
         return (
-            <div className="flex items-center justify-center min-h-[50vh] px-6 text-center">
-                <p className="text-muted-foreground">
+            <div
+                className="flex min-h-screen items-center justify-center bg-[#f4f4f1] px-6 text-center"
+                style={{ fontFamily: 'Arial, sans-serif' }}
+            >
+                <p className="text-sm text-black">
                     Unable to load this release right now.
                 </p>
             </div>
@@ -37,8 +57,11 @@ export default function ReleaseDetailPage() {
 
     if (!release) {
         return (
-            <div className="flex items-center justify-center min-h-[50vh]">
-                <p className="text-muted-foreground">Release not found</p>
+            <div
+                className="flex min-h-screen items-center justify-center bg-[#f4f4f1]"
+                style={{ fontFamily: 'Arial, sans-serif' }}
+            >
+                <p className="text-sm text-black">Release not found</p>
             </div>
         );
     }
@@ -46,78 +69,89 @@ export default function ReleaseDetailPage() {
     const listenLink = release.listenLink;
 
     return (
-        <div className="animate-fade-in">
-            <div className="absolute top-4 left-4 z-10">
+        <div
+            className="min-h-screen bg-[#f4f4f1] px-6 pb-24 pt-6 text-black"
+            style={{ fontFamily: 'Arial, sans-serif' }}
+        >
+            <header className="mb-8 grid grid-cols-[24px_1fr_24px] items-center">
                 <button
                     onClick={() => router.back()}
-                    className="w-8 h-8 flex items-center justify-center rounded-full bg-black/20 backdrop-blur-md text-white hover:bg-black/40 transition-colors"
+                    className="flex h-6 w-6 items-center justify-center text-black active:opacity-60"
+                    aria-label="Back"
                 >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
+                    <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
                 </button>
-            </div>
+                <div className="flex justify-center">
+                    <Image
+                        src="/trv-logo.svg"
+                        alt="TRV"
+                        width={140}
+                        height={40}
+                        priority
+                        className="h-auto w-[140px]"
+                    />
+                </div>
+                <div />
+            </header>
 
-            {/* Cover */}
-            <div className="w-full relative aspect-square bg-muted shadow-sm">
-                {release.cover && (
+            <div className="relative aspect-square w-full bg-[#ededed]">
+                {release.cover ? (
                     <Image
                         src={release.cover.url}
-                        alt={release.cover.alt}
+                        alt={release.cover.alt || release.title}
                         fill
                         sizes="100vw"
                         className="object-cover"
                         priority
                     />
-                )}
-                {release.isUpcoming && (
-                    <div className="absolute top-4 right-4">
-                        <Badge className="bg-white/90 backdrop-blur-md text-trv-blue font-bold text-xs px-3 py-1.5 shadow-lg">
-                            UPCOMING
-                        </Badge>
+                ) : (
+                    <div className="flex h-full w-full items-center justify-center text-sm uppercase tracking-[0.22em] text-[#8c8c8c]">
+                        TRV
                     </div>
                 )}
             </div>
 
-            {/* Info */}
-            <div className="px-5 py-6 flex flex-col min-h-[300px]">
-                <div className="text-[13px] font-medium text-[#8A8A8E] mb-1.5">
-                    {release.typeLabel}
-                </div>
-
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-[28px] leading-tight font-medium text-foreground tracking-[-0.02em] max-w-[200px]">
-                            {release.title}
-                        </h1>
-                        <p className="text-[17px] font-medium text-[#8A8A8E] mt-0.5 tracking-tight">
-                            {release.artistLine}
-                        </p>
-                    </div>
-
-                    {listenLink && (
-                        <Button
-                            className="bg-[#007AFF] hover:bg-[#007AFF]/90 text-white font-bold rounded-[14px] h-[46px] px-6 text-[15px] flex items-center gap-2 shadow-sm transition-transform active:scale-95"
-                            onClick={() => openExternalLink(listenLink.url)}
-                        >
-                            <Play className="w-5 h-5 fill-white" />
-                            {listenLink.label}
-                        </Button>
-                    )}
-                </div>
-
-                <div className="mt-8 space-y-6">
-                    <p className="text-[16px] text-[#2C2C2E] leading-[1.6] tracking-[-0.01em]">
-                        {release.description}
+            <div className="mt-5 grid grid-cols-[1fr_132px] gap-5">
+                <div className="min-w-0">
+                    <p className="mb-1 text-[14px] lowercase text-[#b2b2b2]">
+                        {(release.typeLabel || release.type || 'single').toLowerCase()}
                     </p>
-
-                    {release.producerLine && (
-                        <p className="text-[13px] text-[#8A8A8E]">
-                            Produced by{' '}
-                            <span className="font-medium text-foreground">
-                                {release.producerLine}
-                            </span>
-                        </p>
-                    )}
+                    <h1 className="text-[20px] leading-[1.05] text-black">
+                        {release.title}
+                    </h1>
+                    <p className="mt-1 text-[18px] font-bold leading-tight text-[#7d7d7d]">
+                        {release.artistLine}
+                    </p>
                 </div>
+
+                <div className="flex items-start">
+                    <button
+                        type="button"
+                        onClick={() => {
+                            if (listenLink) {
+                                openExternalLink(listenLink.url);
+                            }
+                        }}
+                        disabled={!listenLink}
+                        className="mt-3 flex h-[44px] w-full items-center justify-center border border-black bg-white text-[16px] text-black active:bg-[#ececec] disabled:cursor-not-allowed disabled:text-[#9d9d9d]"
+                    >
+                        <span>Слушать</span>
+                    </button>
+                </div>
+            </div>
+
+            <div className="my-8 h-px w-full bg-black" />
+
+            <div className="space-y-5">
+                <p className="text-[16px] leading-[1.5] text-[#202020]">
+                    {release.description || 'Описание пока не добавлено.'}
+                </p>
+
+                {release.producerLine ? (
+                    <p className="text-[15px] leading-[1.4] text-[#5f5f5f]">
+                        Produced by {release.producerLine}
+                    </p>
+                ) : null}
             </div>
         </div>
     );

@@ -1,17 +1,31 @@
 'use client';
 
-import { useEvents } from '@/lib/hooks/useEvents';
+import Image from 'next/image';
 import { EventCard } from '@/components/cards/EventCard';
 import { EventCardSkeleton } from '@/components/skeletons/EventCardSkeleton';
+import { useEvents } from '@/lib/hooks/useEvents';
 
 export default function EventsPage() {
     const { data, isLoading, isError } = useEvents();
 
     return (
-        <div className="space-y-6 pt-4">
-            {/* Upcoming Events */}
-            <section className="px-4 space-y-4">
-                <h2 className="text-xs font-bold uppercase tracking-widest text-trv-blue">
+        <div
+            className="min-h-screen bg-[#f4f4f1] px-6 pb-24 pt-6 text-black"
+            style={{ fontFamily: 'Arial, sans-serif' }}
+        >
+            <header className="mb-10 flex items-center justify-center">
+                <Image
+                    src="/trv-logo.svg"
+                    alt="TRV"
+                    width={140}
+                    height={40}
+                    priority
+                    className="h-auto w-[140px]"
+                />
+            </header>
+
+            <section className="space-y-4">
+                <h2 className="text-[13px] uppercase tracking-[0.18em] text-[#707070]">
                     Upcoming
                 </h2>
                 {isLoading ? (
@@ -19,11 +33,11 @@ export default function EventsPage() {
                         <EventCardSkeleton key={i} />
                     ))
                 ) : isError ? (
-                    <p className="text-sm text-muted-foreground py-4">
+                    <p className="border border-black px-4 py-3 text-sm text-black">
                         Unable to load events right now.
                     </p>
                 ) : data?.upcoming.length === 0 ? (
-                    <p className="text-sm text-muted-foreground py-4">
+                    <p className="border border-black px-4 py-3 text-sm text-black">
                         No upcoming events
                     </p>
                 ) : (
@@ -33,9 +47,8 @@ export default function EventsPage() {
                 )}
             </section>
 
-            {/* Past Events */}
-            <section className="px-4 space-y-4 pb-4">
-                <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            <section className="mt-12 space-y-4">
+                <h2 className="text-[13px] uppercase tracking-[0.18em] text-[#707070]">
                     Past
                 </h2>
                 {isLoading ? (
@@ -43,11 +56,13 @@ export default function EventsPage() {
                         <EventCardSkeleton key={i} />
                     ))
                 ) : isError ? (
-                    <p className="text-sm text-muted-foreground py-4">
+                    <p className="border border-black px-4 py-3 text-sm text-black">
                         Unable to load events right now.
                     </p>
                 ) : data?.past.length === 0 ? (
-                    <p className="text-sm text-muted-foreground py-4">No past events</p>
+                    <p className="border border-black px-4 py-3 text-sm text-black">
+                        No past events
+                    </p>
                 ) : (
                     data?.past.map((event) => (
                         <EventCard key={event.id} event={event} />

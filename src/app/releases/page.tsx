@@ -1,7 +1,7 @@
 'use client';
 
 import { useReleases } from '@/lib/hooks/useReleases';
-import { ReleaseCard } from '@/components/cards/ReleaseCard';
+import { ReleaseGlassCard } from '@/components/cards/ReleaseGlassCard';
 import { ReleaseCardSkeleton } from '@/components/skeletons/ReleaseCardSkeleton';
 import Image from 'next/image';
 
@@ -9,32 +9,33 @@ export default function ReleasesPage() {
     const { data: releases, isLoading, isError } = useReleases('newest');
 
     return (
-        <div className="space-y-6 pt-12">
-            {/* Logo Section */}
-            <div className="px-6 mb-6">
+        <div
+            className="min-h-screen bg-[#f4f4f1] px-6 pb-24 pt-6 text-black"
+            style={{ fontFamily: 'Arial, sans-serif' }}
+        >
+            <header className="mb-10 flex items-center justify-center">
                 <Image
                     src="/trv-logo.svg"
-                    alt="TRV RELEASES"
+                    alt="TRV"
                     width={140}
                     height={40}
                     priority
-                    className="w-[180px] h-auto drop-shadow-md brightness-0 invert"
+                    className="h-auto w-[140px]"
                 />
-            </div>
+            </header>
 
-            {/* Releases List */}
-            <section className="px-5 space-y-8">
+            <section className="space-y-14">
                 {isLoading ? (
                     Array.from({ length: 2 }).map((_, i) => (
                         <ReleaseCardSkeleton key={i} />
                     ))
                 ) : isError ? (
-                    <p className="text-sm text-muted-foreground py-4">
+                    <p className="border border-black px-4 py-3 text-sm text-black">
                         Unable to load releases right now.
                     </p>
                 ) : (
                     releases?.map((release) => (
-                        <ReleaseCard key={release.id} release={release} />
+                        <ReleaseGlassCard key={release.id} release={release} />
                     ))
                 )}
             </section>
