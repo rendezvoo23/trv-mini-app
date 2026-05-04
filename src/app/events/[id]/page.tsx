@@ -1,16 +1,14 @@
 'use client';
 
-import { useEvent } from '@/lib/hooks/useEvents';
-import { useParams, useRouter } from 'next/navigation';
+import { useState } from 'react';
 import Image from 'next/image';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { useParams, useRouter } from 'next/navigation';
+import { ChevronLeft } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { appendPromoCodeToUrl } from '@/domain/external-links';
 import { openExternalLink } from '@/lib/telegram';
+import { useEvent } from '@/lib/hooks/useEvents';
 import { getPreferredEventLink } from '@/lib/services/viewModelMappers';
-import { useState } from 'react';
 
 export default function EventDetailPage() {
     const params = useParams();
@@ -20,19 +18,38 @@ export default function EventDetailPage() {
 
     if (isLoading) {
         return (
-            <div className="space-y-4 p-4">
-                <Skeleton className="aspect-[3/4] rounded-xl" />
-                <Skeleton className="h-6 w-48" />
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-20 w-full" />
+            <div
+                className="min-h-screen bg-[#f4f4f1] px-6 pb-24 pt-6 text-black"
+                style={{ fontFamily: 'Arial, sans-serif' }}
+            >
+                <div className="mb-8 flex items-center justify-between">
+                    <Skeleton className="h-6 w-6 rounded-none bg-[#dddddd]" />
+                    <Skeleton className="h-8 w-32 rounded-none bg-[#dddddd]" />
+                    <div className="w-6" />
+                </div>
+                <Skeleton className="aspect-[3/4] w-full rounded-none bg-[#dddddd]" />
+                <div className="mt-6 space-y-2">
+                    <Skeleton className="h-4 w-16 rounded-none bg-[#dddddd]" />
+                    <Skeleton className="h-8 w-40 rounded-none bg-[#dddddd]" />
+                    <Skeleton className="h-5 w-36 rounded-none bg-[#dddddd]" />
+                </div>
+                <Skeleton className="mt-8 h-px w-full rounded-none bg-[#dddddd]" />
+                <div className="mt-8 space-y-2">
+                    <Skeleton className="h-4 w-full rounded-none bg-[#dddddd]" />
+                    <Skeleton className="h-4 w-[92%] rounded-none bg-[#dddddd]" />
+                    <Skeleton className="h-4 w-[88%] rounded-none bg-[#dddddd]" />
+                </div>
             </div>
         );
     }
 
     if (isError) {
         return (
-            <div className="flex items-center justify-center min-h-[50vh] px-6 text-center">
-                <p className="text-muted-foreground">
+            <div
+                className="flex min-h-screen items-center justify-center bg-[#f4f4f1] px-6 text-center"
+                style={{ fontFamily: 'Arial, sans-serif' }}
+            >
+                <p className="text-sm text-black">
                     Unable to load this event right now.
                 </p>
             </div>
@@ -41,8 +58,11 @@ export default function EventDetailPage() {
 
     if (!event) {
         return (
-            <div className="flex items-center justify-center min-h-[50vh]">
-                <p className="text-muted-foreground">Event not found</p>
+            <div
+                className="flex min-h-screen items-center justify-center bg-[#f4f4f1]"
+                style={{ fontFamily: 'Arial, sans-serif' }}
+            >
+                <p className="text-sm text-black">Event not found</p>
             </div>
         );
     }
@@ -54,53 +74,57 @@ export default function EventDetailPage() {
             : primaryLink?.url ?? null;
 
     return (
-        <div className="animate-fade-in">
-            {/* Back button */}
-            <div className="px-4 py-3">
+        <div
+            className="min-h-screen bg-[#f4f4f1] px-6 pb-24 pt-6 text-black"
+            style={{ fontFamily: 'Arial, sans-serif' }}
+        >
+            <header className="mb-8 grid grid-cols-[24px_1fr_24px] items-center">
                 <button
                     onClick={() => router.back()}
-                    className="text-sm font-medium text-trv-blue hover:text-trv-blue-dark transition-colors"
+                    className="flex h-6 w-6 items-center justify-center text-black active:opacity-60"
+                    aria-label="Back"
                 >
-                    ← Back
+                    <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
                 </button>
-            </div>
-
-            {/* Poster */}
-            <div className="px-4">
-                <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-muted">
-                    {event.poster && (
-                        <Image
-                            src={event.poster.url}
-                            alt={event.poster.alt}
-                            fill
-                            sizes="(max-width: 768px) 100vw, 600px"
-                            className="object-cover"
-                            priority
-                        />
-                    )}
+                <div className="flex justify-center">
+                    <Image
+                        src="/trv-logo.svg"
+                        alt="TRV"
+                        width={140}
+                        height={40}
+                        priority
+                        className="h-auto w-[140px]"
+                    />
                 </div>
+                <div />
+            </header>
+
+            <div className="relative aspect-[3/4] w-full bg-[#ededed]">
+                {event.poster ? (
+                    <Image
+                        src={event.poster.url}
+                        alt={event.poster.alt}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 600px"
+                        className="object-cover"
+                        priority
+                    />
+                ) : (
+                    <div className="flex h-full w-full items-center justify-center text-sm uppercase tracking-[0.22em] text-[#8c8c8c]">
+                        TRV
+                    </div>
+                )}
             </div>
 
-            {/* Info */}
-            <div className="px-4 py-5 space-y-4">
-                <div>
-                    <div className="flex items-center gap-2 mb-2">
-                        <Badge className="bg-trv-blue text-white text-xs font-bold px-3 py-1">
-                            {event.eventTypeLabel}
-                        </Badge>
-                        <Badge variant="secondary" className="text-xs font-semibold">
-                            {event.ageRestriction}
-                        </Badge>
-                        {event.isUpcoming && (
-                            <Badge className="bg-green-500 text-white text-xs font-bold px-3 py-1">
-                                Upcoming
-                            </Badge>
-                        )}
-                    </div>
-                    <h1 className="text-2xl font-black tracking-tight text-foreground">
+            <div className="mt-5 space-y-4">
+                <div className="space-y-1">
+                    <p className="text-[14px] lowercase text-[#b2b2b2]">
+                        {event.eventTypeLabel.toLowerCase()} · {event.ageRestriction}
+                    </p>
+                    <h1 className="text-[28px] leading-none text-black">
                         {event.name}
                     </h1>
-                    <p className="text-sm font-medium text-muted-foreground mt-1">
+                    <p className="text-[16px] leading-tight text-[#7d7d7d]">
                         {new Date(event.startsAt).toLocaleDateString('ru-RU', {
                             weekday: 'long',
                             day: 'numeric',
@@ -108,24 +132,50 @@ export default function EventDetailPage() {
                             year: 'numeric',
                         })}
                     </p>
+                    <p className="text-[18px] font-bold leading-tight text-[#7d7d7d]">
+                        {[event.city, event.venueName].filter(Boolean).join(' · ') || 'TRV'}
+                    </p>
                 </div>
 
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                    {event.description}
+                {event.isUpcoming && primaryLink && (
+                    <div className="space-y-3">
+                        {primaryLink.kind === 'tickets' && (
+                            <div className="space-y-1.5">
+                                <label className="text-[13px] uppercase tracking-[0.12em] text-[#707070]">
+                                    Promo Code
+                                </label>
+                                <input
+                                    placeholder="Enter promo code"
+                                    value={promoCode}
+                                    onChange={(e) => setPromoCode(e.target.value)}
+                                    className="h-[44px] w-full border border-black bg-white px-3 text-[16px] text-black outline-none placeholder:text-[#9d9d9d]"
+                                />
+                            </div>
+                        )}
+                        <button
+                            type="button"
+                            className="flex h-[44px] w-full items-center justify-center border border-black bg-white text-[16px] text-black active:bg-[#ececec]"
+                            onClick={() => primaryLinkUrl && openExternalLink(primaryLinkUrl)}
+                        >
+                            {primaryLink.label}
+                        </button>
+                    </div>
+                )}
+
+                <div className="my-8 h-px w-full bg-black" />
+
+                <p className="text-[16px] leading-[1.5] text-[#202020]">
+                    {event.description || 'Описание пока не добавлено.'}
                 </p>
 
-                {/* Photo Gallery */}
                 {event.gallery.length > 0 && (
-                    <div className="space-y-3">
-                        <h2 className="text-xs font-bold uppercase tracking-widest text-trv-blue">
+                    <div className="space-y-4 pt-2">
+                        <h2 className="text-[13px] uppercase tracking-[0.18em] text-[#707070]">
                             Photos
                         </h2>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-2 gap-3">
                             {event.gallery.map((photo, i) => (
-                                <div
-                                    key={i}
-                                    className="relative aspect-[4/3] rounded-xl overflow-hidden bg-muted"
-                                >
+                                <div key={i} className="relative aspect-[4/3] overflow-hidden bg-[#ededed]">
                                     <Image
                                         src={photo.url}
                                         alt={photo.alt}
@@ -137,31 +187,6 @@ export default function EventDetailPage() {
                                 </div>
                             ))}
                         </div>
-                    </div>
-                )}
-
-                {/* Promo Code + Ticket Button */}
-                {event.isUpcoming && primaryLink && (
-                    <div className="space-y-3 pt-2">
-                        {primaryLink.kind === 'tickets' && (
-                            <div className="space-y-1.5">
-                                <label className="text-xs font-semibold text-foreground uppercase tracking-wider">
-                                    Promo Code
-                                </label>
-                                <Input
-                                    placeholder="Enter promo code"
-                                    value={promoCode}
-                                    onChange={(e) => setPromoCode(e.target.value)}
-                                    className="rounded-xl h-11"
-                                />
-                            </div>
-                        )}
-                        <Button
-                            className="w-full bg-trv-blue hover:bg-trv-blue-dark text-white font-bold rounded-xl h-12 text-base"
-                            onClick={() => primaryLinkUrl && openExternalLink(primaryLinkUrl)}
-                        >
-                            {primaryLink.label}
-                        </Button>
                     </div>
                 )}
             </div>

@@ -1,13 +1,13 @@
 'use client';
 
-import { useArtist } from '@/lib/hooks/useArtists';
-import { isPublicSectionEnabled } from '@/domain/featureFlags';
-import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
+import { useParams, useRouter } from 'next/navigation';
+import { ChevronLeft } from 'lucide-react';
 import { MerchCard } from '@/components/cards/MerchCard';
-import { ReleaseCard } from '@/components/cards/ReleaseCard';
+import { ReleaseGlassCard } from '@/components/cards/ReleaseGlassCard';
+import { Skeleton } from '@/components/ui/skeleton';
+import { isPublicSectionEnabled } from '@/domain/featureFlags';
+import { useArtist } from '@/lib/hooks/useArtists';
 
 export default function ArtistDetailPage() {
     const params = useParams();
@@ -17,21 +17,36 @@ export default function ArtistDetailPage() {
 
     if (isLoading) {
         return (
-            <div className="space-y-4 p-4">
-                <div className="flex justify-center">
-                    <Skeleton className="w-40 h-40 rounded-full" />
+            <div
+                className="min-h-screen bg-[#f4f4f1] px-6 pb-24 pt-6 text-black"
+                style={{ fontFamily: 'Arial, sans-serif' }}
+            >
+                <div className="mb-8 flex items-center justify-between">
+                    <Skeleton className="h-6 w-6 rounded-none bg-[#dddddd]" />
+                    <Skeleton className="h-8 w-32 rounded-none bg-[#dddddd]" />
+                    <div className="w-6" />
                 </div>
-                <Skeleton className="h-6 w-40 mx-auto" />
-                <Skeleton className="h-4 w-24 mx-auto" />
-                <Skeleton className="h-20 w-full" />
+                <div className="flex justify-center">
+                    <Skeleton className="h-40 w-40 rounded-full bg-[#dddddd]" />
+                </div>
+                <Skeleton className="mx-auto mt-5 h-7 w-36 rounded-none bg-[#dddddd]" />
+                <Skeleton className="mx-auto mt-3 h-4 w-32 rounded-none bg-[#dddddd]" />
+                <div className="mt-8 space-y-2">
+                    <Skeleton className="h-4 w-full rounded-none bg-[#dddddd]" />
+                    <Skeleton className="h-4 w-[92%] rounded-none bg-[#dddddd]" />
+                    <Skeleton className="h-4 w-[88%] rounded-none bg-[#dddddd]" />
+                </div>
             </div>
         );
     }
 
     if (isError) {
         return (
-            <div className="flex items-center justify-center min-h-[50vh] px-6 text-center">
-                <p className="text-muted-foreground">
+            <div
+                className="flex min-h-screen items-center justify-center bg-[#f4f4f1] px-6 text-center"
+                style={{ fontFamily: 'Arial, sans-serif' }}
+            >
+                <p className="text-sm text-black">
                     Unable to load this member right now.
                 </p>
             </div>
@@ -40,85 +55,106 @@ export default function ArtistDetailPage() {
 
     if (!artist) {
         return (
-            <div className="flex items-center justify-center min-h-[50vh]">
-                <p className="text-muted-foreground">Artist not found</p>
+            <div
+                className="flex min-h-screen items-center justify-center bg-[#f4f4f1]"
+                style={{ fontFamily: 'Arial, sans-serif' }}
+            >
+                <p className="text-sm text-black">Artist not found</p>
             </div>
         );
     }
 
     return (
-        <div className="animate-fade-in">
-            {/* Back button */}
-            <div className="px-4 py-3">
+        <div
+            className="min-h-screen bg-[#f4f4f1] px-6 pb-24 pt-6 text-black"
+            style={{ fontFamily: 'Arial, sans-serif' }}
+        >
+            <header className="mb-8 grid grid-cols-[24px_1fr_24px] items-center">
                 <button
                     onClick={() => router.back()}
-                    className="text-sm font-medium text-trv-blue hover:text-trv-blue-dark transition-colors"
+                    className="flex h-6 w-6 items-center justify-center text-black active:opacity-60"
+                    aria-label="Back"
                 >
-                    ← Back
+                    <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
                 </button>
-            </div>
+                <div className="flex justify-center">
+                    <Image
+                        src="/trv-logo.svg"
+                        alt="TRV"
+                        width={140}
+                        height={40}
+                        priority
+                        className="h-auto w-[140px]"
+                    />
+                </div>
+                <div />
+            </header>
 
-            {/* Profile Header */}
-            <div className="flex flex-col items-center px-4 pb-6">
-                <div className="relative w-36 h-36 rounded-full overflow-hidden bg-muted ring-4 ring-trv-blue-50 mb-4">
-                    {artist.photo && (
+            <div className="flex flex-col items-center">
+                <div className="relative mb-5 h-40 w-40 overflow-hidden rounded-full border border-black bg-white">
+                    {artist.photo ? (
                         <Image
                             src={artist.photo.url}
                             alt={artist.photo.alt}
                             fill
-                            sizes="144px"
+                            sizes="160px"
                             className="object-cover"
                             priority
                         />
+                    ) : (
+                        <div className="flex h-full w-full items-center justify-center text-sm uppercase tracking-[0.22em] text-[#8c8c8c]">
+                            TRV
+                        </div>
                     )}
                 </div>
-                <h1 className="text-2xl font-black tracking-tight text-foreground">
+                <h1 className="text-center text-[30px] leading-none text-black">
                     {artist.name}
                 </h1>
-                <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+                <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
                     {artist.roleLabels.map((roleLabel) => (
-                        <Badge
+                        <span
                             key={roleLabel}
-                            className="bg-trv-blue text-white font-bold text-xs px-4 py-1"
+                            className="border border-black px-3 py-1 text-[12px] uppercase tracking-[0.12em] text-black"
                         >
                             {roleLabel}
-                        </Badge>
+                        </span>
                     ))}
                 </div>
             </div>
 
-            {/* Bio */}
-            <div className="px-4 pb-6">
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                    {artist.bio}
+            <div className="my-8 h-px w-full bg-black" />
+
+            <div>
+                <p className="text-[16px] leading-[1.5] text-[#202020]">
+                    {artist.bio || 'Описание пока не добавлено.'}
                 </p>
             </div>
 
             {artist.artistReleases.length > 0 && (
-                <section className="px-4 pb-6 space-y-4">
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-trv-blue">
+                <section className="mt-10 space-y-4">
+                    <h2 className="text-[13px] uppercase tracking-[0.18em] text-[#707070]">
                         Releases
                     </h2>
                     {artist.artistReleases.map((release) => (
-                        <ReleaseCard key={release.id} release={release} />
+                        <ReleaseGlassCard key={release.id} release={release} />
                     ))}
                 </section>
             )}
 
             {artist.supportReleases.length > 0 && (
-                <section className="px-4 pb-6 space-y-4">
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-trv-blue">
+                <section className="mt-10 space-y-4">
+                    <h2 className="text-[13px] uppercase tracking-[0.18em] text-[#707070]">
                         Contributions
                     </h2>
                     {artist.supportReleases.map((release) => (
-                        <ReleaseCard key={release.id} release={release} />
+                        <ReleaseGlassCard key={release.id} release={release} />
                     ))}
                 </section>
             )}
 
             {showPublicMerch && artist.merchItems.length > 0 && (
-                <section className="px-4 pb-6 space-y-4">
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-trv-blue">
+                <section className="mt-10 space-y-4">
+                    <h2 className="text-[13px] uppercase tracking-[0.18em] text-[#707070]">
                         Merch
                     </h2>
                     <div className="grid grid-cols-2 gap-3">

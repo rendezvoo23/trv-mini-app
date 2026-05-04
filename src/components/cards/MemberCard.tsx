@@ -12,10 +12,11 @@ export function MemberCard({ artist }: MemberCardProps) {
     return (
         <Link
             href={`/artists/${artist.id}`}
-            className="flex flex-col items-center group animate-fade-in active:scale-95 transition-transform"
+            className="flex flex-col items-center text-black active:opacity-70"
+            style={{ fontFamily: 'Arial, sans-serif' }}
         >
-            <div className="relative w-36 h-36 rounded-full overflow-hidden mb-3 bg-muted/30 ring-2 ring-transparent group-hover:ring-trv-blue/50 shadow-sm transition-all duration-300">
-                {artist.photo && (
+            <div className="relative mb-3 h-36 w-36 overflow-hidden rounded-full border border-black bg-white">
+                {artist.photo ? (
                     <Image
                         src={artist.photo.url}
                         alt={artist.photo.alt}
@@ -24,9 +25,13 @@ export function MemberCard({ artist }: MemberCardProps) {
                         className="object-cover"
                         loading="lazy"
                     />
+                ) : (
+                    <div className="flex h-full w-full items-center justify-center text-xs uppercase tracking-[0.2em] text-[#8a8a8a]">
+                        TRV
+                    </div>
                 )}
             </div>
-            <h3 className="text-[15px] font-medium text-foreground text-center tracking-tight">
+            <h3 className="text-center text-[15px] leading-tight text-black">
                 {artist.name}
             </h3>
         </Link>

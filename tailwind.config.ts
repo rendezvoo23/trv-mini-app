@@ -53,7 +53,7 @@ const config: Config = {
 				},
 			},
 			fontFamily: {
-				sans: ["-apple-system", "BlinkMacSystemFont", "SF Pro Display", "SF Pro Text", "Helvetica Neue", "Inter", "sans-serif"],
+				sans: ["Arial", "-apple-system", "BlinkMacSystemFont", "SF Pro Display", "SF Pro Text", "Helvetica Neue", "sans-serif"],
 			},
 			borderRadius: {
 				lg: "var(--radius)",
