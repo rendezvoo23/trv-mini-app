@@ -3,9 +3,7 @@ import { getSupabaseConfig } from '@/lib/supabase/config';
 
 export function createAdminClient() {
     const { url } = getSupabaseConfig();
-    const key =
-        process.env.SUPABASE_SERVICE_ROLE_KEY ??
-        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!key) {
         throw new Error(

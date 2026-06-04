@@ -6,13 +6,13 @@ import {
     getPublishedArtistRows,
     getPublishedReleaseRowsByIds,
 } from '@/lib/repositories/supabaseReadRepository';
-import { createClient } from '@/lib/supabase/client';
 import { isSupabaseConfigured } from '@/lib/supabase/config';
 import {
     mapArtistRowToDetail,
     mapArtistRowToListItem,
     mapReleaseRowToSummary,
 } from '@/lib/supabase/mappers';
+import { createPublicServerClient } from '@/lib/supabase/publicServer';
 
 export async function getArtists(
     filter: MemberFilterCategory = 'All'
@@ -21,7 +21,7 @@ export async function getArtists(
         throw new Error('Supabase is not configured for artists.');
     }
 
-    const supabase = createClient();
+    const supabase = createPublicServerClient();
     const artists = await getPublishedArtistRows(supabase);
     const artistItems = artists.map((artist) =>
         mapArtistRowToListItem(supabase, artist)
@@ -39,7 +39,7 @@ export async function getArtistById(
         throw new Error('Supabase is not configured for artists.');
     }
 
-    const supabase = createClient();
+    const supabase = createPublicServerClient();
     const artist = await getPublishedArtistRowById(supabase, id);
     if (!artist) {
         return null;

@@ -4,12 +4,12 @@ import {
     getPublishedEventRowById,
     getPublishedEventRows,
 } from '@/lib/repositories/supabaseReadRepository';
-import { createClient } from '@/lib/supabase/client';
 import { isSupabaseConfigured } from '@/lib/supabase/config';
 import {
     mapEventRowToDetail,
     mapEventRowToSummary,
 } from '@/lib/supabase/mappers';
+import { createPublicServerClient } from '@/lib/supabase/publicServer';
 
 export async function getEvents(): Promise<{
     upcoming: EventSummaryViewModel[];
@@ -19,7 +19,7 @@ export async function getEvents(): Promise<{
         throw new Error('Supabase is not configured for events.');
     }
 
-    const supabase = createClient();
+    const supabase = createPublicServerClient();
     const eventRows = await getPublishedEventRows(supabase);
     const mappedEvents = eventRows.map((event) =>
         mapEventRowToSummary(supabase, event)
@@ -47,7 +47,7 @@ export async function getEventById(
         throw new Error('Supabase is not configured for events.');
     }
 
-    const supabase = createClient();
+    const supabase = createPublicServerClient();
     const event = await getPublishedEventRowById(supabase, id);
     if (!event) {
         return null;

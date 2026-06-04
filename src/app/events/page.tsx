@@ -1,12 +1,23 @@
-'use client';
-
 import Image from 'next/image';
 import { EventCard } from '@/components/cards/EventCard';
-import { EventCardSkeleton } from '@/components/skeletons/EventCardSkeleton';
-import { useEvents } from '@/lib/hooks/useEvents';
+import { EventSummaryViewModel } from '@/domain/view-models';
+import { getEvents } from '@/lib/services/events';
+import { PUBLIC_DATA_REVALIDATE_SECONDS } from '@/lib/supabase/publicServer';
 
-export default function EventsPage() {
-    const { data, isLoading, isError } = useEvents();
+export const revalidate = PUBLIC_DATA_REVALIDATE_SECONDS;
+
+export default async function EventsPage() {
+    let data: {
+        upcoming: EventSummaryViewModel[];
+        past: EventSummaryViewModel[];
+    } = { upcoming: [], past: [] };
+    let hasError = false;
+
+    try {
+        data = await getEvents();
+    } catch {
+        hasError = true;
+    }
 
     return (
         <div
@@ -28,20 +39,16 @@ export default function EventsPage() {
                 <h2 className="text-[13px] uppercase tracking-[0.18em] text-[#707070]">
                     Upcoming
                 </h2>
-                {isLoading ? (
-                    Array.from({ length: 2 }).map((_, i) => (
-                        <EventCardSkeleton key={i} />
-                    ))
-                ) : isError ? (
+                {hasError ? (
                     <p className="border border-black px-4 py-3 text-sm text-black">
                         Unable to load events right now.
                     </p>
-                ) : data?.upcoming.length === 0 ? (
+                ) : data.upcoming.length === 0 ? (
                     <p className="border border-black px-4 py-3 text-sm text-black">
                         No upcoming events
                     </p>
                 ) : (
-                    data?.upcoming.map((event) => (
+                    data.upcoming.map((event) => (
                         <EventCard key={event.id} event={event} />
                     ))
                 )}
@@ -51,20 +58,16 @@ export default function EventsPage() {
                 <h2 className="text-[13px] uppercase tracking-[0.18em] text-[#707070]">
                     Past
                 </h2>
-                {isLoading ? (
-                    Array.from({ length: 2 }).map((_, i) => (
-                        <EventCardSkeleton key={i} />
-                    ))
-                ) : isError ? (
+                {hasError ? (
                     <p className="border border-black px-4 py-3 text-sm text-black">
                         Unable to load events right now.
                     </p>
-                ) : data?.past.length === 0 ? (
+                ) : data.past.length === 0 ? (
                     <p className="border border-black px-4 py-3 text-sm text-black">
                         No past events
                     </p>
                 ) : (
-                    data?.past.map((event) => (
+                    data.past.map((event) => (
                         <EventCard key={event.id} event={event} />
                     ))
                 )}

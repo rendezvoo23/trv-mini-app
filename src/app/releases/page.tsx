@@ -1,12 +1,20 @@
-'use client';
-
-import { useReleases } from '@/lib/hooks/useReleases';
 import { ReleaseGlassCard } from '@/components/cards/ReleaseGlassCard';
-import { ReleaseCardSkeleton } from '@/components/skeletons/ReleaseCardSkeleton';
 import Image from 'next/image';
+import { ReleaseSummaryViewModel } from '@/domain/view-models';
+import { getReleases } from '@/lib/services/releases';
+import { PUBLIC_DATA_REVALIDATE_SECONDS } from '@/lib/supabase/publicServer';
 
-export default function ReleasesPage() {
-    const { data: releases, isLoading, isError } = useReleases('newest');
+export const revalidate = PUBLIC_DATA_REVALIDATE_SECONDS;
+
+export default async function ReleasesPage() {
+    let releases: ReleaseSummaryViewModel[] = [];
+    let hasError = false;
+
+    try {
+        releases = await getReleases('newest');
+    } catch {
+        hasError = true;
+    }
 
     return (
         <div
@@ -25,16 +33,16 @@ export default function ReleasesPage() {
             </header>
 
             <section className="space-y-14">
-                {isLoading ? (
-                    Array.from({ length: 2 }).map((_, i) => (
-                        <ReleaseCardSkeleton key={i} />
-                    ))
-                ) : isError ? (
+                {hasError ? (
                     <p className="border border-black px-4 py-3 text-sm text-black">
                         Unable to load releases right now.
                     </p>
+                ) : releases.length === 0 ? (
+                    <p className="border border-black px-4 py-3 text-sm text-black">
+                        No releases found
+                    </p>
                 ) : (
-                    releases?.map((release) => (
+                    releases.map((release) => (
                         <ReleaseGlassCard key={release.id} release={release} />
                     ))
                 )}

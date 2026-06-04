@@ -1,46 +1,31 @@
-'use client';
-
 import Image from 'next/image';
-import { useParams, useRouter } from 'next/navigation';
-import { ChevronLeft } from 'lucide-react';
+import { BackButton } from '@/components/BackButton';
 import { MerchCard } from '@/components/cards/MerchCard';
 import { ReleaseGlassCard } from '@/components/cards/ReleaseGlassCard';
-import { Skeleton } from '@/components/ui/skeleton';
 import { isPublicSectionEnabled } from '@/domain/featureFlags';
-import { useArtist } from '@/lib/hooks/useArtists';
+import { getArtistById } from '@/lib/services/artists';
+import { PUBLIC_DATA_REVALIDATE_SECONDS } from '@/lib/supabase/publicServer';
 
-export default function ArtistDetailPage() {
-    const params = useParams();
-    const router = useRouter();
-    const { data: artist, isLoading, isError } = useArtist(params.id as string);
+export const revalidate = PUBLIC_DATA_REVALIDATE_SECONDS;
+
+interface ArtistDetailPageProps {
+    params: {
+        id: string;
+    };
+}
+
+export default async function ArtistDetailPage({ params }: ArtistDetailPageProps) {
     const showPublicMerch = isPublicSectionEnabled('merch');
+    let artist = null;
+    let hasError = false;
 
-    if (isLoading) {
-        return (
-            <div
-                className="min-h-screen bg-[#f4f4f1] px-6 pb-24 pt-6 text-black"
-                style={{ fontFamily: 'Arial, sans-serif' }}
-            >
-                <div className="mb-8 flex items-center justify-between">
-                    <Skeleton className="h-6 w-6 rounded-none bg-[#dddddd]" />
-                    <Skeleton className="h-8 w-32 rounded-none bg-[#dddddd]" />
-                    <div className="w-6" />
-                </div>
-                <div className="flex justify-center">
-                    <Skeleton className="h-40 w-40 rounded-full bg-[#dddddd]" />
-                </div>
-                <Skeleton className="mx-auto mt-5 h-7 w-36 rounded-none bg-[#dddddd]" />
-                <Skeleton className="mx-auto mt-3 h-4 w-32 rounded-none bg-[#dddddd]" />
-                <div className="mt-8 space-y-2">
-                    <Skeleton className="h-4 w-full rounded-none bg-[#dddddd]" />
-                    <Skeleton className="h-4 w-[92%] rounded-none bg-[#dddddd]" />
-                    <Skeleton className="h-4 w-[88%] rounded-none bg-[#dddddd]" />
-                </div>
-            </div>
-        );
+    try {
+        artist = await getArtistById(params.id);
+    } catch {
+        hasError = true;
     }
 
-    if (isError) {
+    if (hasError) {
         return (
             <div
                 className="flex min-h-screen items-center justify-center bg-[#f4f4f1] px-6 text-center"
@@ -70,13 +55,7 @@ export default function ArtistDetailPage() {
             style={{ fontFamily: 'Arial, sans-serif' }}
         >
             <header className="mb-8 grid grid-cols-[24px_1fr_24px] items-center">
-                <button
-                    onClick={() => router.back()}
-                    className="flex h-6 w-6 items-center justify-center text-black active:opacity-60"
-                    aria-label="Back"
-                >
-                    <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
-                </button>
+                <BackButton />
                 <div className="flex justify-center">
                     <Image
                         src="/trv-logo.svg"

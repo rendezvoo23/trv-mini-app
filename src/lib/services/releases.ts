@@ -3,12 +3,12 @@ import {
     getPublishedReleaseRowById,
     getPublishedReleaseRows,
 } from '@/lib/repositories/supabaseReadRepository';
-import { createClient } from '@/lib/supabase/client';
 import { isSupabaseConfigured } from '@/lib/supabase/config';
 import {
     mapReleaseRowToDetail,
     mapReleaseRowToSummary,
 } from '@/lib/supabase/mappers';
+import { createPublicServerClient } from '@/lib/supabase/publicServer';
 import { sortReleases } from '@/lib/services/viewModelMappers';
 
 export async function getReleases(
@@ -18,7 +18,7 @@ export async function getReleases(
         throw new Error('Supabase is not configured for releases.');
     }
 
-    const supabase = createClient();
+    const supabase = createPublicServerClient();
     const releaseRows = await getPublishedReleaseRows(supabase);
     const releases = releaseRows.map((release) =>
         mapReleaseRowToSummary(supabase, release)
@@ -34,7 +34,7 @@ export async function getReleaseById(
         throw new Error('Supabase is not configured for releases.');
     }
 
-    const supabase = createClient();
+    const supabase = createPublicServerClient();
     const release = await getPublishedReleaseRowById(supabase, id);
     if (!release) {
         return null;

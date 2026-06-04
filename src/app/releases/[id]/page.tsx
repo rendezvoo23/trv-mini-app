@@ -1,48 +1,28 @@
-'use client';
-
-import { useRelease } from '@/lib/hooks/useReleases';
-import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Skeleton } from '@/components/ui/skeleton';
-import { openExternalLink } from '@/lib/telegram';
-import { ChevronLeft } from 'lucide-react';
+import { BackButton } from '@/components/BackButton';
+import { OpenExternalButton } from '@/components/OpenExternalButton';
+import { getReleaseById } from '@/lib/services/releases';
+import { PUBLIC_DATA_REVALIDATE_SECONDS } from '@/lib/supabase/publicServer';
 
-export default function ReleaseDetailPage() {
-    const params = useParams();
-    const router = useRouter();
-    const { data: release, isLoading, isError } = useRelease(params.id as string);
+export const revalidate = PUBLIC_DATA_REVALIDATE_SECONDS;
 
-    if (isLoading) {
-        return (
-            <div
-                className="min-h-screen bg-[#f4f4f1] px-6 pb-24 pt-6 text-black"
-                style={{ fontFamily: 'Arial, sans-serif' }}
-            >
-                <div className="mb-8 flex items-center justify-between">
-                    <Skeleton className="h-6 w-6 rounded-none bg-[#dddddd]" />
-                    <Skeleton className="h-8 w-32 rounded-none bg-[#dddddd]" />
-                    <div className="w-6" />
-                </div>
-                <Skeleton className="aspect-square w-full rounded-none bg-[#dddddd]" />
-                <div className="mt-6 grid grid-cols-[1fr_132px] gap-5">
-                    <div className="space-y-2">
-                        <Skeleton className="h-4 w-14 rounded-none bg-[#dddddd]" />
-                        <Skeleton className="h-8 w-32 rounded-none bg-[#dddddd]" />
-                        <Skeleton className="h-6 w-28 rounded-none bg-[#dddddd]" />
-                    </div>
-                    <Skeleton className="mt-4 h-[44px] w-full rounded-none bg-[#dddddd]" />
-                </div>
-                <Skeleton className="mt-8 h-px w-full rounded-none bg-[#dddddd]" />
-                <div className="mt-8 space-y-2">
-                    <Skeleton className="h-4 w-full rounded-none bg-[#dddddd]" />
-                    <Skeleton className="h-4 w-[92%] rounded-none bg-[#dddddd]" />
-                    <Skeleton className="h-4 w-[88%] rounded-none bg-[#dddddd]" />
-                </div>
-            </div>
-        );
+interface ReleaseDetailPageProps {
+    params: {
+        id: string;
+    };
+}
+
+export default async function ReleaseDetailPage({ params }: ReleaseDetailPageProps) {
+    let release = null;
+    let hasError = false;
+
+    try {
+        release = await getReleaseById(params.id);
+    } catch {
+        hasError = true;
     }
 
-    if (isError) {
+    if (hasError) {
         return (
             <div
                 className="flex min-h-screen items-center justify-center bg-[#f4f4f1] px-6 text-center"
@@ -74,13 +54,7 @@ export default function ReleaseDetailPage() {
             style={{ fontFamily: 'Arial, sans-serif' }}
         >
             <header className="mb-8 grid grid-cols-[24px_1fr_24px] items-center">
-                <button
-                    onClick={() => router.back()}
-                    className="flex h-6 w-6 items-center justify-center text-black active:opacity-60"
-                    aria-label="Back"
-                >
-                    <ChevronLeft className="h-5 w-5" strokeWidth={2.2} />
-                </button>
+                <BackButton />
                 <div className="flex justify-center">
                     <Image
                         src="/trv-logo.svg"
@@ -125,18 +99,14 @@ export default function ReleaseDetailPage() {
                 </div>
 
                 <div className="flex items-start">
-                    <button
-                        type="button"
-                        onClick={() => {
-                            if (listenLink) {
-                                openExternalLink(listenLink.url);
-                            }
-                        }}
-                        disabled={!listenLink}
+                    <OpenExternalButton
+                        url={listenLink?.url ?? null}
+                        label="Слушать"
+                        ariaLabel={
+                            listenLink ? `Слушать ${release.title}` : 'Ссылка недоступна'
+                        }
                         className="mt-3 flex h-[44px] w-full items-center justify-center border border-black bg-white text-[16px] text-black active:bg-[#ececec] disabled:cursor-not-allowed disabled:text-[#9d9d9d]"
-                    >
-                        <span>Слушать</span>
-                    </button>
+                    />
                 </div>
             </div>
 

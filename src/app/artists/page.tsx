@@ -1,16 +1,20 @@
-'use client';
-
 import Image from 'next/image';
-import { MemberCard } from '@/components/cards/MemberCard';
-import { FilterTabs } from '@/components/FilterTabs';
-import { MemberCardSkeleton } from '@/components/skeletons/MemberCardSkeleton';
-import { MEMBER_FILTER_OPTIONS } from '@/domain/config';
-import { useArtists } from '@/lib/hooks/useArtists';
-import { useUIStore } from '@/store/uiStore';
+import { ArtistsListClient } from '@/components/artists/ArtistsListClient';
+import { ArtistListItemViewModel } from '@/domain/view-models';
+import { getArtists } from '@/lib/services/artists';
+import { PUBLIC_DATA_REVALIDATE_SECONDS } from '@/lib/supabase/publicServer';
 
-export default function ArtistsPage() {
-    const { memberFilter, setMemberFilter } = useUIStore();
-    const { data: artists, isLoading, isError } = useArtists(memberFilter);
+export const revalidate = PUBLIC_DATA_REVALIDATE_SECONDS;
+
+export default async function ArtistsPage() {
+    let artists: ArtistListItemViewModel[] = [];
+    let hasError = false;
+
+    try {
+        artists = await getArtists('All');
+    } catch {
+        hasError = true;
+    }
 
     return (
         <div
@@ -28,31 +32,15 @@ export default function ArtistsPage() {
                 />
             </header>
 
-            <div className="mb-4">
-                <FilterTabs
-                    options={MEMBER_FILTER_OPTIONS}
-                    activeOption={memberFilter}
-                    onSelect={setMemberFilter}
-                />
-            </div>
-
-            <section className="px-6">
-                <div className="grid grid-cols-2 gap-x-6 gap-y-10">
-                    {isLoading ? (
-                        Array.from({ length: 6 }).map((_, i) => (
-                            <MemberCardSkeleton key={i} />
-                        ))
-                    ) : isError ? (
-                        <p className="col-span-2 border border-black px-4 py-3 text-sm text-black">
-                            Unable to load members right now.
-                        </p>
-                    ) : (
-                        artists?.map((artist) => (
-                            <MemberCard key={artist.id} artist={artist} />
-                        ))
-                    )}
-                </div>
-            </section>
+            {hasError ? (
+                <section className="px-6">
+                    <p className="border border-black px-4 py-3 text-sm text-black">
+                        Unable to load members right now.
+                    </p>
+                </section>
+            ) : (
+                <ArtistsListClient artists={artists} />
+            )}
         </div>
     );
 }
